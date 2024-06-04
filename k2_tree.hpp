@@ -5,34 +5,47 @@
 #include <queue>
 #include <stdexcept>
 #include <tuple>
-#include "sdsl/bit_vectors.hpp"
-#include "sdsl/k2_tree_helper.hpp"
-#include "sdsl/int_vector_buffer.hpp"
+#include <sdsl/bit_vectors.hpp>
+#include <sdsl/k2_tree_helper.hpp>
+#include <sdsl/int_vector_buffer.hpp>
+#include <sdsl/int_vector.hpp>
+
+using namespace sdsl;
 
 
 //! Namespace for the succint data structure library
-namespace sdsl
-{
 //! A k^2-tree
 /*! A k^2-tree is a compact tree structure to represent a web graph. The
  *  structure takes advantage of large empty areas of the adjacency matrix of
  *  the graph.
  *
- *  \par References
+ *   References
  *      [1] Brisaboa, N. R., Ladra, S., & Navarro, G. (2009, August):
  *          k2-trees for compact web graph representation. In International
  *          Symposium on String Processing and Information Retrieval
  *          (pp. 18-30). Springer Berlin Heidelberg.
  */
 
+#include <sdsl/bit_vectors.hpp>
+
+typedef struct matrix{
+    int i;
+    int j;
+    int v;
+} matrix;
+
+
+typedef int data_type;
+typedef uint64_t idx_type;
+
 template<uint8_t k,
-         typename t_bv=bit_vector,
+         typename t_bv=sdsl::bit_vector,
          typename t_rank=typename t_bv::rank_1_type>
 class k2_tree
 {
     public:
-        typedef k2_tree_ns::idx_type idx_type;
-        typedef k2_tree_ns::size_type size_type;
+        typedef uint64_t idx_type;
+        typedef uint64_t size_type;
 
     private:
         //! Bit array to store all the bits of the tree, except those in the
@@ -43,12 +56,15 @@ class k2_tree
 
         t_rank      k_t_rank;
 
-        //new values
+        //new values.
+        // parametrizar tipo de datos
 
-        std::vector<int>      k_l_values;
+        std::vector<std::tuple<idx_type,idx_type,data_type>>      k_l_values;
 
         uint8_t     k_k;
         uint16_t    k_height;
+
+
 
     protected:
 
@@ -91,6 +107,25 @@ class k2_tree
                 }
 
             k2_tree_ns::build_template_vector<t_bv>(k_t_, k_l_, k_t, k_l);
+        }
+         static idx_type zOrder(idx_type i, idx_type j){
+            // n: Numero maximo de bits a procesar
+            int n = std::max(i,j);
+
+            idx_type z = 0;
+            idx_type bit = 0;
+            
+            while(n>0){
+                // Aqui se recorren los bits de las posiciones i y j
+                idx_type ib = (i>>bit)&1;
+                idx_type jb = (j>>bit)&1;
+                // Operacion para encontrar el bit de la secuencia zOrder de i y j
+                z |= (ib << (2*bit)) | (jb << (2*bit+1));
+                // Se desplaza n para procesar el siguiente bit
+                n >>= 1;
+                bit++;
+            }
+            return z;
         }
 
 
@@ -290,14 +325,47 @@ class k2_tree
          *  \param size Size of the graph, all the nodes in edges must be
          *              within 0 and size ([0, size[).
          */
-        k2_tree(std::vector<std::tuple<idx_type, idx_type>>& edges,
-                const size_type size)
+        k2_tree(std::vector<std::tuple<idx_type, idx_type, int>>& array,
+                const int size)
         {
+
+            //construir un vector de pares
+            std::vector<std::tuple<idx_type, idx_type>> edges;
+
+            for(int i=0; i<edges.size(); i++){
+                idx_type a,b;
+                a = std::get<0>(array[i]);
+                b = std::get<1>(array[i]);
+                //c = get<2>(array[i]);
+                std::tuple<idx_type, idx_type> t = std::make_tuple(a,b);
+                edges.push_back(t);
+            }
+
             assert(size > 0);
             assert(edges.size() > 0);
 
             build_from_edges(edges, size);
+
+            std::sort(array.begin(),array.begin()+size, new_sort);
+
+            for(int i=0; i<array.size(); i++){
+                k_l_values.push_back(array[i]);
+            }
+
         }
+
+        static bool new_sort(std::tuple<idx_type,idx_type,data_type> a, std::tuple<idx_type,idx_type,data_type> b){
+            idx_type i1, i2, j1, j2;
+            i1 = std::get<0>(a);
+            i2 = std::get<0>(b);
+            j1 = std::get<1>(a);
+            j2 = std::get<1>(b);
+            return zOrder(i1,j1) < zOrder(i2,j2);            
+        }
+
+        
+        //check filas por columnas en multiplicacion
+        //arreglar suma y constructor
 
         //! Constructor
         /*! This constructos expects a filename prefix. Two serialized
@@ -314,8 +382,8 @@ class k2_tree
          */
         k2_tree(std::string filename, size_type size=0)
         {
-			int_vector_buffer<> buf_x(filename + ".x", std::ios::in);
-			int_vector_buffer<> buf_y(filename + ".y", std::ios::in);
+			sdsl::int_vector_buffer<> buf_x(filename + ".x", std::ios::in);
+			sdsl::int_vector_buffer<> buf_y(filename + ".y", std::ios::in);
 
 			assert(buf_x.size() == buf_y.size());
 			assert(buf_x.size() > 0);
@@ -340,7 +408,7 @@ class k2_tree
 		}
 
 
-        k2_tree(const k2_tree& tr)
+        k2_tree(k2_tree& tr)
         {
             *this = tr;
         }
@@ -349,7 +417,7 @@ class k2_tree
         {
             *this = std::move(tr);
         }
-
+        
         //! Move assignment operator
         k2_tree& operator=(k2_tree&& tr)
         {
@@ -376,6 +444,18 @@ class k2_tree
                 k_height = tr.k_height;
             }
             return *this;
+        }
+
+        idx_type get_i(int i){
+            return std::get<0>(k_l_values[i]);
+        }
+
+        idx_type get_j(int j){
+            return std::get<1>(k_l_values[j]);
+        }
+
+        int get_v(int v){
+            return std::get<2>(k_l_values[v]);
         }
 
         //! Swap operator
@@ -407,6 +487,15 @@ class k2_tree
             return true;
         }
 
+        // operator []
+        int operator[](int i) const{
+            if(i < k_t.size()){
+                return k_t[i];
+            }else{
+                return k_l[i - k_t.size()];
+            }
+        }
+
         t_bv get_t()
         {
             return k_t;
@@ -415,6 +504,25 @@ class k2_tree
         t_bv get_l()
         {
             return k_l;
+        }
+
+        std::vector<std::tuple<idx_type,idx_type,data_type>> get_l_values(){
+            return k_l_values;
+        }
+
+        
+        bool comparar(matrix m1, matrix m2){
+            return zOrder(m1.i,m1.j) < zOrder(m2.i,m2.j);
+        }
+
+        void new_array(matrix* m, int n){
+
+            sort(m, m+n, comparar);
+
+            for(int i=0; i<n; i++){
+                k_l_values.push_back(std::make_tuple(m[i].i,m[i].j,m[i].v));
+            }
+            
         }
 
         //! Indicates whether node j is adjacent to node i or not.
@@ -454,6 +562,100 @@ class k2_tree
             }
 
             return k_l[level - k_t.size()] == 1;
+        }
+
+        int size(){
+            return k_t.size() + k_l.size();
+        }
+
+        int get_index(){
+            //returns current index of k_l
+            return k_l.size();
+        }
+
+        int get_k_k(){
+            return k_k;
+        }
+
+        // function at
+        int at(int i){
+            if(i < k_t.size()){
+                return k_t[i];
+            }else{
+                return k_l[i - k_t.size()];
+            }
+        }
+
+        //resize function
+        void resize(int n){
+            k_t.resize(n);
+            k_l.resize(n);
+        }
+
+        // get k_t_rank
+
+        int get_k_t_rank(int i){
+            return k_t_rank(i);
+        }
+
+        //! Returns the subtree of a tree
+        /*!
+         *  \param i Node to get the subtree from.
+         *  \returns A k2_tree representing the subtree of node i.
+         */
+        k2_tree subtree(idx_type i) const
+        {
+            if (k_t.size() == 0 && k_l.size() == 0)
+                return k2_tree();
+            size_type n = std::pow(k_k, k_height - 1);
+            size_type k_2 = std::pow(k_k, 2);
+            idx_type col, row;
+
+            // This is duplicated to avoid an extra if at the loop. As idx_type
+            // is unsigned and rank has an offset of one, is not possible to run
+            // k_t_rank with zero as parameter at the first iteration.
+            row = std::floor(i/static_cast<double>(n));
+            col = std::floor(i/static_cast<double>(n));
+            i = i % n;
+            idx_type level = k_k * row + col;
+            n = n/k_k;
+
+            while (level < k_t.size()) {
+                if (k_t[level] == 0)
+                    return k2_tree();
+                row = std::floor(i/static_cast<double>(n));
+                col = std::floor(i/static_cast<double>(n));
+                i = i % n;
+                level = k_t_rank(level + 1) * k_2 + k_k * row + col;
+                n = n/k_k;
+            }
+
+            k2_tree res;
+            res.k_t = k_t.sub_bv(level + 1, k_t.size() - level - 1);
+            res.k_l = k_l;
+            res.k_t_rank = t_rank(&res.k_t);
+            res.k_k = k_k;
+            res.k_height = k_height - (level + 1)/k_2;
+            return res;
+        }
+
+        // returns position on array tree
+
+        int get_position(int i){
+            if(i < k_t.size()){
+                return i;
+            }else{
+                return i - k_t.size();
+            }
+        }
+
+        //get a child
+        int get_child(int i){
+            if(i < k_t.size()){
+                return k_t_rank(i) * k_k * k_k + i;
+            }else{
+                return k_t_rank(i) * k_k * k_k + i - k_t.size();
+            }
         }
 
         //! Returns a list of neighbors of node i.
@@ -560,7 +762,7 @@ class k2_tree
         size_type serialize(std::ostream& out, structure_tree_node* v=nullptr,
                             std::string name="") const
         {
-            structure_tree_node* child = structure_tree::add_child(
+            sdsl::structure_tree_node* child = structure_tree::add_child(
                                              v, name, util::class_name(*this));
             size_type written_bytes = 0;
 
@@ -588,7 +790,9 @@ class k2_tree
             read_member(k_height, in);
         }
 
+
 };
-}
+
+
 
 #endif

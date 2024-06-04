@@ -1,192 +1,101 @@
-#include <sdsl/k2_tree.hpp>
+#include "k2_tree.hpp"
 #include <iostream>
 #include <vector>
+#include "functions.cpp"
+#include <tuple>
+#include <ctime>
 
-using namespace sdsl;
 using namespace std;
 
-typedef struct {
+typedef uint64_t idx_type;
+
+bool is_leaf(k2_tree<2> t){
+    return t.size() == 1;
+}
+
+typedef struct pos{
     int i;
     int j;
-    int v;
-} matrix;
+} position;
 
+pos get_reversed_z_order(int z){
+    int i = 0;
+    int j = 0;
+    int bit = 0;
+    while(z>0){
+        i |= (z & 1) << bit;
+        z >>= 1;
+        j |= (z & 1) << bit;
+        z >>= 1;
+        bit++;
+    }
+    pos p;
+    p.i = i;
+    p.j = j;
+    return p;
+}
 
-vector<vector<int>> multiplicacion(vector<vector<int>> m1,vector<vector<int>> m2){
-    vector<vector<int>> m3;
-    int n = m1.size();
-    for(int i=0; i<n; i++){
-        vector<int> fila;
-        for(int j=0; j<n; j++){
-            int sum = 0;
-            for(int k=0; k<n; k++){
-                sum += m1[i][k]*m2[k][j];
+bool is_root(k2_tree<2> t){
+    return t.get_index() == 0;
+}
+
+// suma de k2 trees usando recursion
+// repensar en manera de hacerlo
+// problema con que retornar
+
+void suma(vector<tuple<idx_type,idx_type,int>> ret , k2_tree<2>& t1, k2_tree<2>& t2, int pos1, int pos2){
+    // uses recursion to sum the k2 trees
+    if(is_root(t1)&&is_root(t2)){
+        cout << 10 << endl;
+        suma(ret,t1,t2,t1.get_child(0),t2.get_child(0));
+        suma(ret,t1,t2,t1.get_child(1),t2.get_child(1));
+        suma(ret,t1,t2,t1.get_child(2),t2.get_child(2));
+        suma(ret,t1,t2,t1.get_child(3),t2.get_child(3));
+        cout << 11 << endl;
+    if(is_leaf(t1)&&is_leaf(t2)){
+        int i1;
+        i1 = t1.get_index();
+        pos k;
+        k = get_reversed_z_order(i1);
+        for(int i=0; i<4; i++){
+            if(t1.get_i(i) == k.i && t2.get_i(i) == k.i && t1.get_j(i) == k.j && t2.get_j(i) == k.j){
+                int add = t1.get_v(i) + t2.get_v(i);
+                tuple<idx_type,idx_type,int> r(t1.get_i(i),t1.get_j(i),add);
+                ret.push_back(r);
             }
-            fila.push_back(sum);
+            else if(t1.get_i(i) == k.i && t2.get_i(i) == k.i && t1.get_j(i) != k.j && t2.get_j(i) != k.j){
+                int add = t1.get_v(i);
+                tuple<idx_type,idx_type,int> r(t1.get_i(i),t1.get_j(i),add);
+                ret.push_back(r);
+            }
+            else if(t1.get_i(i) != k.i && t2.get_i(i) != k.i && t1.get_j(i) == k.j && t2.get_j(i) == k.j){
+                int add = t2.get_v(i);
+                tuple<idx_type,idx_type,int> r(t2.get_i(i),t2.get_j(i),add);
+                ret.push_back(r);
+            }
+            else{
+                int add = 0;
+                continue;
+            }
+            
         }
-        m3.push_back(fila);
+         // tupla 3-elemento
+        // Parametro que va diciendo por que hijo vas bajando
+        // Usar vector de tuplas
     }
-    return m3;
-}
+    else{
+        //suma de los elementos de los nodos
+        suma(ret,t1,t2,t1.get_child(0),t2.get_child(0));
+        suma(ret,t1,t2,t1.get_child(1),t2.get_child(1));
+        suma(ret,t1,t2,t1.get_child(2),t2.get_child(2));
+        suma(ret,t1,t2,t1.get_child(3),t2.get_child(3));
 
-vector<vector<int>> submatrix(vector<vector<int>> m, int i, int j, int n){
-    //dividir matriz en 4 submatrices
-    vector<vector<int>> m2;
-    for(int k=i; k<i+n; k++){
-        vector<int> fila;
-        for(int l=j; l<j+n; l++){
-            fila.push_back(m[k][l]);
-        }
-        m2.push_back(fila);
+        // cambiar parametro a posicion
+        // preguntar k2_tree.root
+        // t1.child(0)
+    
     }
-    return m2;
-}
-
-vector<vector<int>> addMatrices(const vector<vector<int>>& A, const vector<vector<int>>& B) {
-    int n = A.size();
-    vector<vector<int>> result(n, vector<int>(n, 0));
-
-    for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < n; ++j) {
-            result[i][j] = A[i][j] + B[i][j];
-        }
     }
-
-    return result;
-}
-
-// Función para restar dos matrices
-vector<vector<int>> subtractMatrices(const vector<vector<int>>& A, const vector<vector<int>>& B) {
-    int n = A.size();
-    vector<vector<int>> result(n, vector<int>(n, 0));
-
-    for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < n; ++j) {
-            result[i][j] = A[i][j] - B[i][j];
-        }
-    }
-
-    return result;
-}
-
-vector<vector<int>> zMultiplication(const vector<vector<int>>& A, const vector<vector<int>>& B){
-    int n = A.size();
-
-    // Caso base: matrices de 1x1
-    if (n == 1) {
-        vector<vector<int>> result(1, vector<int>(1, 0));
-        result[0][0] = A[0][0] * B[0][0];
-        return result;
-    }
-
-    // Dividir las matrices en 4 submatrices
-    int mid = n / 2;
-    vector<vector<int>> A11(mid, vector<int>(mid, 0));
-    vector<vector<int>> A12(mid, vector<int>(mid, 0));
-    vector<vector<int>> A21(mid, vector<int>(mid, 0));
-    vector<vector<int>> A22(mid, vector<int>(mid, 0));
-
-    vector<vector<int>> B11(mid, vector<int>(mid, 0));
-    vector<vector<int>> B12(mid, vector<int>(mid, 0));
-    vector<vector<int>> B21(mid, vector<int>(mid, 0));
-    vector<vector<int>> B22(mid, vector<int>(mid, 0));
-
-    for (int i = 0; i < mid; ++i) {
-        for (int j = 0; j < mid; ++j) {
-            A11[i][j] = A[i][j];
-            A12[i][j] = A[i][j + mid];
-            A21[i][j] = A[i + mid][j];
-            A22[i][j] = A[i + mid][j + mid];
-
-            B11[i][j] = B[i][j];
-            B12[i][j] = B[i][j + mid];
-            B21[i][j] = B[i + mid][j];
-            B22[i][j] = B[i + mid][j + mid];
-        }
-    }
-
-    vector<vector<int>> C11 = addMatrices(zMultiplication(A11, B11), zMultiplication(A12, B21));
-    vector<vector<int>> C12 = addMatrices(zMultiplication(A11, B12), zMultiplication(A12, B22));
-    vector<vector<int>> C21 = addMatrices(zMultiplication(A21, B11), zMultiplication(A22, B21));
-    vector<vector<int>> C22 = addMatrices(zMultiplication(A21, B12), zMultiplication(A22, B22));
-
-    vector<vector<int>> result(n, vector<int>(n, 0));
-    for (int i = 0; i < mid; ++i) {
-        for (int j = 0; j < mid; ++j) {
-            result[i][j] = C11[i][j];
-            result[i][j + mid] = C12[i][j];
-            result[i + mid][j] = C21[i][j];
-            result[i + mid][j + mid] = C22[i][j];
-        }
-    }
-
-    return result;
-}
-
-// Función principal de multiplicación de matrices usando el algoritmo de dividir y conquistar
-vector<vector<int>> strassen(const vector<vector<int>>& A, const vector<vector<int>>& B) {
-    int n = A.size();
-
-    // Caso base: matrices de 1x1
-    if (n == 1) {
-        vector<vector<int>> result(1, vector<int>(1, 0));
-        result[0][0] = A[0][0] * B[0][0];
-        return result;
-    }
-
-    // Dividir las matrices en 4 submatrices
-    int mid = n / 2;
-    vector<vector<int>> A11(mid, vector<int>(mid, 0));
-    vector<vector<int>> A12(mid, vector<int>(mid, 0));
-    vector<vector<int>> A21(mid, vector<int>(mid, 0));
-    vector<vector<int>> A22(mid, vector<int>(mid, 0));
-
-    vector<vector<int>> B11(mid, vector<int>(mid, 0));
-    vector<vector<int>> B12(mid, vector<int>(mid, 0));
-    vector<vector<int>> B21(mid, vector<int>(mid, 0));
-    vector<vector<int>> B22(mid, vector<int>(mid, 0));
-
-    for (int i = 0; i < mid; ++i) {
-        for (int j = 0; j < mid; ++j) {
-            A11[i][j] = A[i][j];
-            A12[i][j] = A[i][j + mid];
-            A21[i][j] = A[i + mid][j];
-            A22[i][j] = A[i + mid][j + mid];
-
-            B11[i][j] = B[i][j];
-            B12[i][j] = B[i][j + mid];
-            B21[i][j] = B[i + mid][j];
-            B22[i][j] = B[i + mid][j + mid];
-        }
-    }
-
-    // Calcula las siete multiplicaciones recursivas según el algoritmo de Strassen
-    vector<vector<int>> P1 = strassen(A11, subtractMatrices(B12, B22));
-    vector<vector<int>> P2 = strassen(addMatrices(A11, A12), B22);
-    vector<vector<int>> P3 = strassen(addMatrices(A21, A22), B11);
-    vector<vector<int>> P4 = strassen(A22, subtractMatrices(B21, B11));
-    vector<vector<int>> P5 = strassen(addMatrices(A11, A22), addMatrices(B11, B22));
-    vector<vector<int>> P6 = strassen(subtractMatrices(A12, A22), addMatrices(B21, B22));
-    vector<vector<int>> P7 = strassen(subtractMatrices(A11, A21), addMatrices(B11, B12));
-
-    // Calcula las cuatro submatrices resultantes
-    vector<vector<int>> C11 = subtractMatrices(addMatrices(addMatrices(P5, P4), P6), P2);
-    vector<vector<int>> C12 = addMatrices(P1, P2);
-    vector<vector<int>> C21 = addMatrices(P3, P4);
-    vector<vector<int>> C22 = subtractMatrices(subtractMatrices(addMatrices(P5, P1), P3), P7);
-
-    // Combina las cuatro submatrices resultantes en una sola matriz
-    vector<vector<int>> result(n, vector<int>(n, 0));
-    for (int i = 0; i < mid; ++i) {
-        for (int j = 0; j < mid; ++j) {
-            result[i][j] = C11[i][j];
-            result[i][j + mid] = C12[i][j];
-            result[i + mid][j] = C21[i][j];
-            result[i + mid][j + mid] = C22[i][j];
-        }
-    }
-
-    return result;
 }
 
 int zOrder(int i, int j){
@@ -225,6 +134,109 @@ int* new_array(matrix* m, int n){
     return arr;
 }
 
+void join(vector<tuple<idx_type,idx_type,int>> ret, vector<tuple<idx_type,idx_type,int>> ret1,vector<tuple<idx_type,idx_type,int>> ret2,vector<tuple<idx_type,idx_type,int>> ret3,vector<tuple<idx_type,idx_type,int>> ret4){
+    for(int i=0; i<ret1.size(); i++){
+        ret.push_back(ret1[i]);
+    }
+    for(int i=0; i<ret2.size(); i++){
+        ret.push_back(ret2[i]);
+    }
+    for(int i=0; i<ret3.size(); i++){
+        ret.push_back(ret3[i]);
+    }
+    for(int i=0; i<ret4.size(); i++){
+        ret.push_back(ret4[i]);
+    }
+}
+
+void multiplicar(vector<tuple<idx_type,idx_type,int>> ret, k2_tree<2>& t1, k2_tree<2>& t2, int pos1, int pos2){
+    vector<tuple<idx_type,idx_type,int>> c1, c2, c3, c4, c5, c6, c7, c8, ret1, ret2, ret3, ret4;
+    if(is_root(t1)&&is_root(t2)){
+        multiplicar(c1,t1,t2,t1.get_child(0),t2.get_child(0));
+        multiplicar(c2,t1,t2,t1.get_child(1),t2.get_child(2));
+        multiplicar(c3,t1,t2,t1.get_child(0),t2.get_child(1));
+        multiplicar(c4,t1,t2,t1.get_child(1),t2.get_child(3));
+        multiplicar(c5,t1,t2,t1.get_child(2),t2.get_child(0));
+        multiplicar(c6,t1,t2,t1.get_child(3),t2.get_child(2));
+        multiplicar(c7,t1,t2,t1.get_child(2),t2.get_child(1));
+        multiplicar(c8,t1,t2,t1.get_child(3),t2.get_child(3));
+        k2_tree<2> t3(c1,c1.size());
+        k2_tree<2> t4(c2,c2.size());
+        k2_tree<2> t5(c3,c3.size());
+        k2_tree<2> t6(c4,c4.size());
+        k2_tree<2> t7(c5,c5.size());
+        k2_tree<2> t8(c6,c6.size());
+        k2_tree<2> t9(c7,c7.size());
+        k2_tree<2> t10(c8,c8.size());
+        suma(ret1,t3,t4,0,0);
+        suma(ret2,t5,t6,0,0);
+        suma(ret3,t7,t8,0,0);
+        suma(ret4,t9,t10,0,0);
+        join(ret,ret1,ret2,ret3,ret4);
+    }
+    if(is_leaf(t1)&&is_leaf(t2)){
+        int i1, i2;
+        i1 = t1.get_index();
+        i2 = t2.get_index();
+        pos k1, k2;
+        k1 = get_reversed_z_order(i1);
+        k2 = get_reversed_z_order(i2);
+        if(k1.j == k2.i){
+            int add = t1.get_v(i1)*t2.get_v(i2);//comprobar
+            tuple<idx_type,idx_type,int> r(t1.get_i(i1),t2.get_j(i2),add);
+            ret.push_back(r);
+        }
+        else{
+            int add = 0;
+        }
+    }
+    else{
+            multiplicar(c1,t1,t2,t1.get_child(0),t2.get_child(0));
+            multiplicar(c2,t1,t2,t1.get_child(1),t2.get_child(2));
+            multiplicar(c3,t1,t2,t1.get_child(0),t2.get_child(1));
+            multiplicar(c4,t1,t2,t1.get_child(1),t2.get_child(3));
+            multiplicar(c5,t1,t2,t1.get_child(2),t2.get_child(0));
+            multiplicar(c6,t1,t2,t1.get_child(3),t2.get_child(2));
+            multiplicar(c7,t1,t2,t1.get_child(2),t2.get_child(1));
+            multiplicar(c8,t1,t2,t1.get_child(3),t2.get_child(3));
+            k2_tree<2> t3(c1,c1.size());
+            k2_tree<2> t4(c2,c2.size());
+            k2_tree<2> t5(c3,c3.size());
+            k2_tree<2> t6(c4,c4.size());
+            k2_tree<2> t7(c5,c5.size());
+            k2_tree<2> t8(c6,c6.size());
+            k2_tree<2> t9(c7,c7.size());
+            k2_tree<2> t10(c8,c8.size());
+            suma(ret1,t3,t4,0,0);
+            suma(ret2,t5,t6,0,0);
+            suma(ret3,t7,t8,0,0);
+            suma(ret4,t9,t10,0,0);
+            join(ret,ret1,ret2,ret3,ret4);
+        }
+    
+}
+
+unsigned k0, k1;
+
+k2_tree<2> sumaImpl(k2_tree<2>& t1, k2_tree<2>& t2){
+    vector<tuple<idx_type,idx_type,int>> ret;
+    k0 = clock();
+    suma(ret,t1,t2,0,0);
+    k2_tree<2> t3(ret,ret.size());
+    k1 = clock();
+    return t3;
+}
+
+k2_tree<2> multiplicarImpl(k2_tree<2>& t1, k2_tree<2>& t2){
+    vector<tuple<idx_type,idx_type,int>> ret;
+    k0 = clock();
+    multiplicar(ret,t1,t2,0,0);
+    k2_tree<2> t3(ret,ret.size());
+    k1 = clock();
+    return t3;
+}
+
+double _time = (double(k1-k0)/CLOCKS_PER_SEC);
 
 
 int main(){
@@ -237,7 +249,7 @@ int main(){
         {2,1,2,l}
     };
 
-    matrix m[6];
+    matrix_pos m[6];
     m[0].i = 0;
     m[0].j = 0;
     m[0].v = 1;
@@ -261,20 +273,56 @@ int main(){
     m[5].i = 1;
     m[5].j = 2;
     m[5].v = 8;
-    
-    int *arr = new_array(m, n);
 
+    matrix_pos k[6];
+    k[0].i = 0;
+    k[0].j = 0;
+    k[0].v = 1;
+
+    k[1].i = 1;
+    k[1].j = 1;
+    k[1].v = 2;
+
+    k[2].i = 2;
+    k[2].j = 3;
+    k[2].v = 4;
+
+    k[3].i = 3;
+    k[3].j = 0;
+    k[3].v = 3;
+
+    k[4].i = 3;
+    k[4].j = 1;
+    k[4].v = 1;
+
+    k[5].i = 1;
+    k[5].j = 2;
+    k[5].v = 8;
+    
+    vector<tuple<idx_type,idx_type,int>> m1;
     for(int i=0; i<n; i++){
-        cout << arr[i] << endl;
+        tuple<idx_type,idx_type,int> t = make_tuple(m[i].i,m[i].j,m[i].v);
+        m1.push_back(t);
+    }
+    vector<tuple<idx_type,idx_type,int>> m2;
+    for(int i=0; i<n; i++){
+        tuple<idx_type,idx_type,int> t = make_tuple(k[i].i,k[i].j,k[i].v);
+        m2.push_back(t);
     }
 
-    //k2_tree<2> arbol(matriz);
-    //cout << "[";
-    //for(int i=0; i<arbol.get_l().size()-1; i++){
-    //    cout << arbol.get_l()[i] << ",";
-    //}
-    //cout << arbol.get_l()[arbol.get_l().size()-1] << "]" <<endl;
-    delete[] arr;
+    k2_tree<2> arbol1(m1,n);
+    k2_tree<2> arbol2(m2,n);
+
+    vector<tuple<idx_type,idx_type,int>> ret;
+
+    suma(ret,arbol1,arbol2,0,0);
+
+    for(int i=0; i<ret.size(); i++){
+        cout << get<0>(ret[i]) << " " << get<1>(ret[i]) << " " << get<2>(ret[i]) << endl;
+    }
+
+    k2_tree<2> arbol3(ret,ret.size());
+
     return 0;
 
 }
