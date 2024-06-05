@@ -43,7 +43,7 @@ bool is_root(k2_tree<2> t){
 // repensar en manera de hacerlo
 // problema con que retornar
 
-void suma(vector<tuple<idx_type,idx_type,int>> ret , k2_tree<2>& t1, k2_tree<2>& t2, int pos1, int pos2){
+void suma(vector<tuple<idx_type,idx_type,int>> &ret , k2_tree<2>& t1, k2_tree<2>& t2, int pos1, int pos2){
     // uses recursion to sum the k2 trees
     if(is_root(t1)&&is_root(t2)){
         cout << 10 << endl;
@@ -134,7 +134,7 @@ int* new_array(matrix* m, int n){
     return arr;
 }
 
-void join(vector<tuple<idx_type,idx_type,int>> ret, vector<tuple<idx_type,idx_type,int>> ret1,vector<tuple<idx_type,idx_type,int>> ret2,vector<tuple<idx_type,idx_type,int>> ret3,vector<tuple<idx_type,idx_type,int>> ret4){
+void join(vector<tuple<idx_type,idx_type,int>> &ret, vector<tuple<idx_type,idx_type,int>> &ret1,vector<tuple<idx_type,idx_type,int>> &ret2,vector<tuple<idx_type,idx_type,int>> &ret3,vector<tuple<idx_type,idx_type,int>> &ret4){
     for(int i=0; i<ret1.size(); i++){
         ret.push_back(ret1[i]);
     }
@@ -149,7 +149,7 @@ void join(vector<tuple<idx_type,idx_type,int>> ret, vector<tuple<idx_type,idx_ty
     }
 }
 
-void multiplicar(vector<tuple<idx_type,idx_type,int>> ret, k2_tree<2>& t1, k2_tree<2>& t2, int pos1, int pos2){
+void multiplicar(vector<tuple<idx_type,idx_type,int>> &ret, k2_tree<2>& t1, k2_tree<2>& t2, int pos1, int pos2){
     vector<tuple<idx_type,idx_type,int>> c1, c2, c3, c4, c5, c6, c7, c8, ret1, ret2, ret3, ret4;
     if(is_root(t1)&&is_root(t2)){
         multiplicar(c1,t1,t2,t1.get_child(0),t2.get_child(0));
