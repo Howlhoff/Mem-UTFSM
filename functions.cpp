@@ -2,12 +2,9 @@
 #include <iostream>
 #include <vector>
 
-using namespace sdsl;
 using namespace std;
 
-typedef uint64_t idx_type;
-
-typedef struct {
+typedef struct{
     idx_type i;
     idx_type j;
     int v;

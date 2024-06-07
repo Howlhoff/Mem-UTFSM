@@ -9,16 +9,20 @@ using namespace std;
 
 typedef uint64_t idx_type;
 
-bool is_leaf(k2_tree<2> t){
-    return t.size() == 1;
+bool is_leaf(int actual, k2_tree<2>& t){
+    if(actual >= t.get_t().size()){
+        return true;
+    }
+    return false;
 }
 
-typedef struct pos{
+typedef struct{
     int i;
     int j;
 } position;
 
-pos get_reversed_z_order(int z){
+
+position get_reversed_z_order(int z){
     int i = 0;
     int j = 0;
     int bit = 0;
@@ -29,14 +33,14 @@ pos get_reversed_z_order(int z){
         z >>= 1;
         bit++;
     }
-    pos p;
+    position p;
     p.i = i;
     p.j = j;
     return p;
 }
 
-bool is_root(k2_tree<2> t){
-    return t.get_index() == 0;
+bool is_root(int pos){
+    return pos == 0;
 }
 
 // suma de k2 trees usando recursion
@@ -45,39 +49,46 @@ bool is_root(k2_tree<2> t){
 
 void suma(vector<tuple<idx_type,idx_type,int>> &ret , k2_tree<2>& t1, k2_tree<2>& t2, int pos1, int pos2){
     // uses recursion to sum the k2 trees
-    if(is_root(t1)&&is_root(t2)){
-        cout << 10 << endl;
-        suma(ret,t1,t2,t1.get_child(0),t2.get_child(0));
-        suma(ret,t1,t2,t1.get_child(1),t2.get_child(1));
-        suma(ret,t1,t2,t1.get_child(2),t2.get_child(2));
-        suma(ret,t1,t2,t1.get_child(3),t2.get_child(3));
+    if(is_root(pos1)&&is_root(pos2)){
+        int t1c1, t1c2, t1c3, t1c4;
+        int t2c1, t2c2, t2c3, t2c4;
+        t1c1 = t1.get_child(pos1,0);
+        t1c2 = t1.get_child(pos1,1);
+        t1c3 = t1.get_child(pos1,2);
+        t1c4 = t1.get_child(pos1,3);
+        t2c1 = t2.get_child(pos2,0);
+        t2c2 = t2.get_child(pos2,1);
+        t2c3 = t2.get_child(pos2,2);
+        t2c4 = t2.get_child(pos2,3);
+        cout << t1c1 << t1c2 << t1c3 << t1c4 << endl;
+        suma(ret,t1,t2,t1c1,t2c1);
+        suma(ret,t1,t2,t1c2,t2c2);
+        suma(ret,t1,t2,t1c3,t2c3);
+        suma(ret,t1,t2,t1c4,t2c4);
         cout << 11 << endl;
-    if(is_leaf(t1)&&is_leaf(t2)){
-        int i1;
-        i1 = t1.get_index();
-        pos k;
-        k = get_reversed_z_order(i1);
-        for(int i=0; i<4; i++){
-            if(t1.get_i(i) == k.i && t2.get_i(i) == k.i && t1.get_j(i) == k.j && t2.get_j(i) == k.j){
-                int add = t1.get_v(i) + t2.get_v(i);
-                tuple<idx_type,idx_type,int> r(t1.get_i(i),t1.get_j(i),add);
-                ret.push_back(r);
-            }
-            else if(t1.get_i(i) == k.i && t2.get_i(i) == k.i && t1.get_j(i) != k.j && t2.get_j(i) != k.j){
-                int add = t1.get_v(i);
-                tuple<idx_type,idx_type,int> r(t1.get_i(i),t1.get_j(i),add);
-                ret.push_back(r);
-            }
-            else if(t1.get_i(i) != k.i && t2.get_i(i) != k.i && t1.get_j(i) == k.j && t2.get_j(i) == k.j){
-                int add = t2.get_v(i);
-                tuple<idx_type,idx_type,int> r(t2.get_i(i),t2.get_j(i),add);
-                ret.push_back(r);
-            }
-            else{
-                int add = 0;
-                continue;
-            }
-            
+    if(is_leaf(pos1,t1)&&is_leaf(pos2,t2)){
+        int i;
+        i = t1.get_index();
+        position k;
+        cout << 1 << endl;
+        k = get_reversed_z_order(i);
+        if(t1.get_i(i) == k.i && t2.get_i(i) == k.i && t1.get_j(i) == k.j && t2.get_j(i) == k.j){
+            int add = t1.get_v(i) + t2.get_v(i);
+            tuple<idx_type,idx_type,int> r(t1.get_i(i),t1.get_j(i),add);
+            ret.push_back(r);
+        }
+        else if(t1.get_i(i) == k.i && t2.get_i(i) == k.i && t1.get_j(i) != k.j && t2.get_j(i) != k.j){
+            int add = t1.get_v(i);
+            tuple<idx_type,idx_type,int> r(t1.get_i(i),t1.get_j(i),add);
+            ret.push_back(r);
+        }
+        else if(t1.get_i(i) != k.i && t2.get_i(i) != k.i && t1.get_j(i) == k.j && t2.get_j(i) == k.j){
+            int add = t2.get_v(i);
+            tuple<idx_type,idx_type,int> r(t2.get_i(i),t2.get_j(i),add);
+            ret.push_back(r);
+        }
+        else{
+            int add = 0;
         }
          // tupla 3-elemento
         // Parametro que va diciendo por que hijo vas bajando
@@ -85,10 +96,21 @@ void suma(vector<tuple<idx_type,idx_type,int>> &ret , k2_tree<2>& t1, k2_tree<2>
     }
     else{
         //suma de los elementos de los nodos
-        suma(ret,t1,t2,t1.get_child(0),t2.get_child(0));
-        suma(ret,t1,t2,t1.get_child(1),t2.get_child(1));
-        suma(ret,t1,t2,t1.get_child(2),t2.get_child(2));
-        suma(ret,t1,t2,t1.get_child(3),t2.get_child(3));
+        int t1c1, t1c2, t1c3, t1c4;
+        int t2c1, t2c2, t2c3, t2c4;
+        t1c1 = t1.get_child(pos1,0);
+        t1c2 = t1.get_child(pos1,1);
+        t1c3 = t1.get_child(pos1,2);
+        t1c4 = t1.get_child(pos1,3);
+        t2c1 = t2.get_child(pos1,0);
+        t2c2 = t2.get_child(pos1,1);
+        t2c3 = t2.get_child(pos1,2);
+        t2c4 = t2.get_child(pos1,3);
+        suma(ret,t1,t2,t1c1,t2c1);
+        suma(ret,t1,t2,t1c2,t2c2);
+        suma(ret,t1,t2,t1c3,t2c3);
+        suma(ret,t1,t2,t1c4,t2c4);
+        cout << 13 << endl;
 
         // cambiar parametro a posicion
         // preguntar k2_tree.root
@@ -151,15 +173,15 @@ void join(vector<tuple<idx_type,idx_type,int>> &ret, vector<tuple<idx_type,idx_t
 
 void multiplicar(vector<tuple<idx_type,idx_type,int>> &ret, k2_tree<2>& t1, k2_tree<2>& t2, int pos1, int pos2){
     vector<tuple<idx_type,idx_type,int>> c1, c2, c3, c4, c5, c6, c7, c8, ret1, ret2, ret3, ret4;
-    if(is_root(t1)&&is_root(t2)){
-        multiplicar(c1,t1,t2,t1.get_child(0),t2.get_child(0));
-        multiplicar(c2,t1,t2,t1.get_child(1),t2.get_child(2));
-        multiplicar(c3,t1,t2,t1.get_child(0),t2.get_child(1));
-        multiplicar(c4,t1,t2,t1.get_child(1),t2.get_child(3));
-        multiplicar(c5,t1,t2,t1.get_child(2),t2.get_child(0));
-        multiplicar(c6,t1,t2,t1.get_child(3),t2.get_child(2));
-        multiplicar(c7,t1,t2,t1.get_child(2),t2.get_child(1));
-        multiplicar(c8,t1,t2,t1.get_child(3),t2.get_child(3));
+    if(is_root(pos1)&&is_root(pos2)){
+        multiplicar(c1,t1,t2,t1.get_child(pos1,0),t2.get_child(pos2,0));
+        multiplicar(c2,t1,t2,t1.get_child(pos1,1),t2.get_child(pos2,2));
+        multiplicar(c3,t1,t2,t1.get_child(pos1,0),t2.get_child(pos2,1));
+        multiplicar(c4,t1,t2,t1.get_child(pos1,1),t2.get_child(pos1,3));
+        multiplicar(c5,t1,t2,t1.get_child(pos1,2),t2.get_child(pos2,0));
+        multiplicar(c6,t1,t2,t1.get_child(pos1,3),t2.get_child(pos2,2));
+        multiplicar(c7,t1,t2,t1.get_child(pos1,2),t2.get_child(pos2,1));
+        multiplicar(c8,t1,t2,t1.get_child(pos1,3),t2.get_child(pos1,3));
         k2_tree<2> t3(c1,c1.size());
         k2_tree<2> t4(c2,c2.size());
         k2_tree<2> t5(c3,c3.size());
@@ -174,11 +196,11 @@ void multiplicar(vector<tuple<idx_type,idx_type,int>> &ret, k2_tree<2>& t1, k2_t
         suma(ret4,t9,t10,0,0);
         join(ret,ret1,ret2,ret3,ret4);
     }
-    if(is_leaf(t1)&&is_leaf(t2)){
+    if(is_leaf(pos1,t1)&&is_leaf(pos2,t2)){
         int i1, i2;
         i1 = t1.get_index();
         i2 = t2.get_index();
-        pos k1, k2;
+        position k1, k2;
         k1 = get_reversed_z_order(i1);
         k2 = get_reversed_z_order(i2);
         if(k1.j == k2.i){
@@ -191,14 +213,14 @@ void multiplicar(vector<tuple<idx_type,idx_type,int>> &ret, k2_tree<2>& t1, k2_t
         }
     }
     else{
-            multiplicar(c1,t1,t2,t1.get_child(0),t2.get_child(0));
-            multiplicar(c2,t1,t2,t1.get_child(1),t2.get_child(2));
-            multiplicar(c3,t1,t2,t1.get_child(0),t2.get_child(1));
-            multiplicar(c4,t1,t2,t1.get_child(1),t2.get_child(3));
-            multiplicar(c5,t1,t2,t1.get_child(2),t2.get_child(0));
-            multiplicar(c6,t1,t2,t1.get_child(3),t2.get_child(2));
-            multiplicar(c7,t1,t2,t1.get_child(2),t2.get_child(1));
-            multiplicar(c8,t1,t2,t1.get_child(3),t2.get_child(3));
+            multiplicar(c1,t1,t2,t1.get_child(pos1,0),t2.get_child(pos2,0));
+            multiplicar(c2,t1,t2,t1.get_child(pos1,1),t2.get_child(pos2,2));
+            multiplicar(c3,t1,t2,t1.get_child(pos1,0),t2.get_child(pos2,1));
+            multiplicar(c4,t1,t2,t1.get_child(pos1,1),t2.get_child(pos2,3));
+            multiplicar(c5,t1,t2,t1.get_child(pos1,2),t2.get_child(pos2,0));
+            multiplicar(c6,t1,t2,t1.get_child(pos1,3),t2.get_child(pos2,2));
+            multiplicar(c7,t1,t2,t1.get_child(pos1,2),t2.get_child(pos2,1));
+            multiplicar(c8,t1,t2,t1.get_child(pos1,3),t2.get_child(pos2,3));
             k2_tree<2> t3(c1,c1.size());
             k2_tree<2> t4(c2,c2.size());
             k2_tree<2> t5(c3,c3.size());
@@ -216,7 +238,7 @@ void multiplicar(vector<tuple<idx_type,idx_type,int>> &ret, k2_tree<2>& t1, k2_t
     
 }
 
-unsigned k0, k1;
+unsigned int k0, k1;
 
 k2_tree<2> sumaImpl(k2_tree<2>& t1, k2_tree<2>& t2){
     vector<tuple<idx_type,idx_type,int>> ret;
@@ -240,15 +262,7 @@ double _time = (double(k1-k0)/CLOCKS_PER_SEC);
 
 
 int main(){
-    int l = 0;
     int n = 6;
-    vector<vector<int>> matriz {
-        {5,2,3,4},
-        {2,3,l,4},
-        {1,3,2,l},
-        {2,1,2,l}
-    };
-
     matrix_pos m[6];
     m[0].i = 0;
     m[0].j = 0;
@@ -313,15 +327,16 @@ int main(){
     k2_tree<2> arbol1(m1,n);
     k2_tree<2> arbol2(m2,n);
 
-    vector<tuple<idx_type,idx_type,int>> ret;
+    //vector<tuple<idx_type,idx_type,int>> ret;
 
-    suma(ret,arbol1,arbol2,0,0);
+    cout << arbol1.get_child(0,3) << endl;
+    //suma(ret,arbol1,arbol2,0,0);
 
-    for(int i=0; i<ret.size(); i++){
-        cout << get<0>(ret[i]) << " " << get<1>(ret[i]) << " " << get<2>(ret[i]) << endl;
-    }
-
-    k2_tree<2> arbol3(ret,ret.size());
+    //for(int i=0; i<ret.size(); i++){
+    //    cout << get<0>(ret[i]) << " " << get<1>(ret[i]) << " " << get<2>(ret[i]) << endl;
+    //}
+//
+    //k2_tree<2> arbol3(ret,ret.size());
 
     return 0;
 

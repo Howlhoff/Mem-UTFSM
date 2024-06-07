@@ -28,7 +28,7 @@ using namespace sdsl;
 
 #include <sdsl/bit_vectors.hpp>
 
-typedef struct matrix{
+typedef struct{
     int i;
     int j;
     int v;
@@ -332,11 +332,10 @@ class k2_tree
             //construir un vector de pares
             std::vector<std::tuple<idx_type, idx_type>> edges;
 
-            for(int i=0; i<edges.size(); i++){
+            for(int i=0; i<array.size(); i++){
                 idx_type a,b;
                 a = std::get<0>(array[i]);
                 b = std::get<1>(array[i]);
-                //c = get<2>(array[i]);
                 std::tuple<idx_type, idx_type> t = std::make_tuple(a,b);
                 edges.push_back(t);
             }
@@ -487,15 +486,6 @@ class k2_tree
             return true;
         }
 
-        // operator []
-        int operator[](int i) const{
-            if(i < k_t.size()){
-                return k_t[i];
-            }else{
-                return k_l[i - k_t.size()];
-            }
-        }
-
         t_bv get_t()
         {
             return k_t;
@@ -565,7 +555,7 @@ class k2_tree
         }
 
         int size(){
-            return k_t.size() + k_l.size();
+            return k_t.size() + k_l_values.size();
         }
 
         int get_index(){
@@ -576,6 +566,8 @@ class k2_tree
         int get_k_k(){
             return k_k;
         }
+
+
 
         // function at
         int at(int i){
@@ -641,20 +633,15 @@ class k2_tree
 
         // returns position on array tree
 
-        int get_position(int i){
-            if(i < k_t.size()){
+        //get a child
+        int get_child(int actual, int i){
+            std::cout << "actual: " << actual << std::endl;
+            if(i < k_t.bit_size() && k_l[actual-k_t.bit_size()] == 1){
+                std::cout << k_t.bit_size() << std::endl;
                 return i;
             }else{
-                return i - k_t.size();
-            }
-        }
-
-        //get a child
-        int get_child(int i){
-            if(i < k_t.size()){
-                return k_t_rank(i) * k_k * k_k + i;
-            }else{
-                return k_t_rank(i) * k_k * k_k + i - k_t.size();
+                std::cout << k_t_rank(actual + 1) * k_k * k_k + i << std::endl;
+                return k_t_rank(actual + 1) * k_k * k_k + i;
             }
         }
 
