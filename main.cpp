@@ -49,23 +49,9 @@ bool is_root(int pos){
 
 void suma(vector<tuple<idx_type,idx_type,int>> &ret , k2_tree<2>& t1, k2_tree<2>& t2, int pos1, int pos2){
     // uses recursion to sum the k2 trees
-    if(is_root(pos1)&&is_root(pos2)){
-        int t1c1, t1c2, t1c3, t1c4;
-        int t2c1, t2c2, t2c3, t2c4;
-        t1c1 = t1.get_child(pos1,0);
-        t1c2 = t1.get_child(pos1,1);
-        t1c3 = t1.get_child(pos1,2);
-        t1c4 = t1.get_child(pos1,3);
-        t2c1 = t2.get_child(pos2,0);
-        t2c2 = t2.get_child(pos2,1);
-        t2c3 = t2.get_child(pos2,2);
-        t2c4 = t2.get_child(pos2,3);
-        cout << t1c1 << t1c2 << t1c3 << t1c4 << endl;
-        suma(ret,t1,t2,t1c1,t2c1);
-        suma(ret,t1,t2,t1c2,t2c2);
-        suma(ret,t1,t2,t1c3,t2c3);
-        suma(ret,t1,t2,t1c4,t2c4);
-        cout << 11 << endl;
+    string k;
+    cout << "estoy en pos1=" << pos1 << "\nestoy en pos2=" << pos2 << endl;
+    cin >> k;
     if(is_leaf(pos1,t1)&&is_leaf(pos2,t2)){
         int i;
         i = t1.get_index();
@@ -90,9 +76,7 @@ void suma(vector<tuple<idx_type,idx_type,int>> &ret , k2_tree<2>& t1, k2_tree<2>
         else{
             int add = 0;
         }
-         // tupla 3-elemento
-        // Parametro que va diciendo por que hijo vas bajando
-        // Usar vector de tuplas
+        return;
     }
     else{
         //suma de los elementos de los nodos
@@ -102,14 +86,14 @@ void suma(vector<tuple<idx_type,idx_type,int>> &ret , k2_tree<2>& t1, k2_tree<2>
         t1c2 = t1.get_child(pos1,1);
         t1c3 = t1.get_child(pos1,2);
         t1c4 = t1.get_child(pos1,3);
-        t2c1 = t2.get_child(pos1,0);
-        t2c2 = t2.get_child(pos1,1);
-        t2c3 = t2.get_child(pos1,2);
-        t2c4 = t2.get_child(pos1,3);
-        suma(ret,t1,t2,t1c1,t2c1);
-        suma(ret,t1,t2,t1c2,t2c2);
-        suma(ret,t1,t2,t1c3,t2c3);
-        suma(ret,t1,t2,t1c4,t2c4);
+        t2c1 = t2.get_child(pos2,0);
+        t2c2 = t2.get_child(pos2,1);
+        t2c3 = t2.get_child(pos2,2);
+        t2c4 = t2.get_child(pos2,3);
+        if (t1c1 != -1 && t2c1 != -1) suma(ret, t1, t2, t1c1, t2c1);
+        if (t1c2 != -1 && t2c2 != -1) suma(ret, t1, t2, t1c2, t2c2);
+        if (t1c3 != -1 && t2c3 != -1) suma(ret, t1, t2, t1c3, t2c3);
+        if (t1c4 != -1 && t2c4 != -1) suma(ret, t1, t2, t1c4, t2c4);
         cout << 13 << endl;
 
         // cambiar parametro a posicion
@@ -117,8 +101,8 @@ void suma(vector<tuple<idx_type,idx_type,int>> &ret , k2_tree<2>& t1, k2_tree<2>
         // t1.child(0)
     
     }
-    }
 }
+
 
 int zOrder(int i, int j){
     // n: Numero maximo de bits a procesar
@@ -173,29 +157,6 @@ void join(vector<tuple<idx_type,idx_type,int>> &ret, vector<tuple<idx_type,idx_t
 
 void multiplicar(vector<tuple<idx_type,idx_type,int>> &ret, k2_tree<2>& t1, k2_tree<2>& t2, int pos1, int pos2){
     vector<tuple<idx_type,idx_type,int>> c1, c2, c3, c4, c5, c6, c7, c8, ret1, ret2, ret3, ret4;
-    if(is_root(pos1)&&is_root(pos2)){
-        multiplicar(c1,t1,t2,t1.get_child(pos1,0),t2.get_child(pos2,0));
-        multiplicar(c2,t1,t2,t1.get_child(pos1,1),t2.get_child(pos2,2));
-        multiplicar(c3,t1,t2,t1.get_child(pos1,0),t2.get_child(pos2,1));
-        multiplicar(c4,t1,t2,t1.get_child(pos1,1),t2.get_child(pos1,3));
-        multiplicar(c5,t1,t2,t1.get_child(pos1,2),t2.get_child(pos2,0));
-        multiplicar(c6,t1,t2,t1.get_child(pos1,3),t2.get_child(pos2,2));
-        multiplicar(c7,t1,t2,t1.get_child(pos1,2),t2.get_child(pos2,1));
-        multiplicar(c8,t1,t2,t1.get_child(pos1,3),t2.get_child(pos1,3));
-        k2_tree<2> t3(c1,c1.size());
-        k2_tree<2> t4(c2,c2.size());
-        k2_tree<2> t5(c3,c3.size());
-        k2_tree<2> t6(c4,c4.size());
-        k2_tree<2> t7(c5,c5.size());
-        k2_tree<2> t8(c6,c6.size());
-        k2_tree<2> t9(c7,c7.size());
-        k2_tree<2> t10(c8,c8.size());
-        suma(ret1,t3,t4,0,0);
-        suma(ret2,t5,t6,0,0);
-        suma(ret3,t7,t8,0,0);
-        suma(ret4,t9,t10,0,0);
-        join(ret,ret1,ret2,ret3,ret4);
-    }
     if(is_leaf(pos1,t1)&&is_leaf(pos2,t2)){
         int i1, i2;
         i1 = t1.get_index();
@@ -260,6 +221,13 @@ k2_tree<2> multiplicarImpl(k2_tree<2>& t1, k2_tree<2>& t2){
 
 double _time = (double(k1-k0)/CLOCKS_PER_SEC);
 
+void print_bit_vector(const bit_vector &bv) {
+    for (const auto &bit : bv) {
+        std::cout << bit;
+    }
+    std::cout << std::endl;
+}
+
 
 int main(){
     int n = 6;
@@ -288,30 +256,26 @@ int main(){
     m[5].j = 2;
     m[5].v = 8;
 
-    matrix_pos k[6];
-    k[0].i = 0;
+    matrix_pos k[5];
+    k[0].i = 2;
     k[0].j = 0;
-    k[0].v = 1;
+    k[0].v = 2;
 
-    k[1].i = 1;
-    k[1].j = 1;
-    k[1].v = 2;
+    k[1].i = 3;
+    k[1].j = 0;
+    k[1].v = 1;
 
-    k[2].i = 2;
-    k[2].j = 3;
-    k[2].v = 4;
+    k[2].i = 3;
+    k[2].j = 1;
+    k[2].v = 1;
 
-    k[3].i = 3;
-    k[3].j = 0;
-    k[3].v = 3;
+    k[3].i = 0;
+    k[3].j = 2;
+    k[3].v = 2;
 
     k[4].i = 3;
-    k[4].j = 1;
+    k[4].j = 3;
     k[4].v = 1;
-
-    k[5].i = 1;
-    k[5].j = 2;
-    k[5].v = 8;
     
     vector<tuple<idx_type,idx_type,int>> m1;
     for(int i=0; i<n; i++){
@@ -319,7 +283,7 @@ int main(){
         m1.push_back(t);
     }
     vector<tuple<idx_type,idx_type,int>> m2;
-    for(int i=0; i<n; i++){
+    for(int i=0; i<5; i++){
         tuple<idx_type,idx_type,int> t = make_tuple(k[i].i,k[i].j,k[i].v);
         m2.push_back(t);
     }
@@ -327,16 +291,21 @@ int main(){
     k2_tree<2> arbol1(m1,n);
     k2_tree<2> arbol2(m2,n);
 
-    //vector<tuple<idx_type,idx_type,int>> ret;
+    cout << "test" << endl;
 
-    cout << arbol1.get_child(0,3) << endl;
-    //suma(ret,arbol1,arbol2,0,0);
+    vector<tuple<idx_type,idx_type,int>> ret;
 
-    //for(int i=0; i<ret.size(); i++){
-    //    cout << get<0>(ret[i]) << " " << get<1>(ret[i]) << " " << get<2>(ret[i]) << endl;
-    //}
-//
-    //k2_tree<2> arbol3(ret,ret.size());
+    print_bit_vector(arbol1.get_t());
+    print_bit_vector(arbol1.get_l());
+    print_bit_vector(arbol2.get_t());
+    print_bit_vector(arbol2.get_l());
+
+    suma(ret,arbol1,arbol2,0,0);
+
+    k2_tree<2> arbol3(ret,ret.size());
+
+    print_bit_vector(arbol3.get_t());
+    print_bit_vector(arbol3.get_l());
 
     return 0;
 
