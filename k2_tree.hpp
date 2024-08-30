@@ -55,11 +55,12 @@ class k2_tree
         t_bv        k_l;
 
         t_rank      k_t_rank;
+        t_rank      k_l_rank;
 
         //new values.
         // parametrizar tipo de datos
 
-        std::vector<std::tuple<idx_type,idx_type,data_type>>      k_l_values;
+        std::vector<data_type>      k_l_values;
 
         uint8_t     k_k;
         uint16_t    k_height;
@@ -213,7 +214,7 @@ class k2_tree
                     auto idx = k2_tree_ns::get_chunk_idx(
                     std::get<0>(edges[it]), std::get<1>(edges[it]),
                     c_0, r_0, l, k_k);
-                    std::cout << "Edge: (" << std::get<0>(edges[it]) << ", " << std::get<1>(edges[it]) << ") -> Chunk Index: " << idx << std::endl;
+                    //std::cout << "Edge: (" << std::get<0>(edges[it]) << ", " << std::get<1>(edges[it]) << ") -> Chunk Index: " << idx << std::endl;
                     amount_by_chunk[idx] += 1;
                 }
 
@@ -228,7 +229,7 @@ class k2_tree
                     for (it = 0; it < k_2; it++, t++) {
                         if (amount_by_chunk[it] != 0) {
                             k_l_[t] = 1;
-                            std::cout << "Setting k_l_[" << t << "] = 1 (Leaf level)" << std::endl;
+                            //std::cout << "Setting k_l_[" << t << "] = 1 (Leaf level)" << std::endl;
                         }
                     }
                     // At l == 1 we do not put new elements at the queue.
@@ -253,7 +254,7 @@ class k2_tree
                                             l / k_k,
                                             r_0 + r * l,
                                             c_0 + c * l));
-                        std::cout << "Pushed chunk (" << r << ", " << c << ") to queue, setting k_t_[" << t << "] = 1" << std::endl;
+                        //std::cout << "Pushed chunk (" << r << ", " << c << ") to queue, setting k_t_[" << t << "] = 1" << std::endl;
                     }
                 }
 
@@ -279,6 +280,7 @@ class k2_tree
             k_l_.resize(t);
             k2_tree_ns::build_template_vector<t_bv>(k_t_, k_l_, k_t, k_l);
             k_t_rank = t_rank(&k_t);
+            k_l_rank = t_rank(&k_l);
         }
 
         //! Build a tree from an edges collection
@@ -468,8 +470,7 @@ class k2_tree
             SelectionSort(array);
 
             for(int i=0; i<array.size(); i++){
-                std::cout << std::get<0>(array[i]) << " " << std::get<1>(array[i]) << " " << std::get<2>(array[i]) << std::endl;
-                k_l_values.push_back(array[i]);
+                k_l_values.push_back(std::get<2>(array[i]));
             }
 
         }
@@ -565,17 +566,10 @@ class k2_tree
             }
             return *this;
         }
-
-        idx_type get_i(int i){
-            return std::get<0>(k_l_values[i]);
-        }
-
-        idx_type get_j(int j){
-            return std::get<1>(k_l_values[j]);
-        }
+        
 
         int get_v(int v){
-            return std::get<2>(k_l_values[v]);
+            return k_l_values[v];
         }
 
         //! Swap operator
@@ -617,7 +611,7 @@ class k2_tree
             return k_l;
         }
 
-        std::vector<std::tuple<idx_type,idx_type,data_type>> get_l_values(){
+        std::vector<data_type> get_l_values(){
             return k_l_values;
         }
 
@@ -631,7 +625,7 @@ class k2_tree
             sort(m, m+n, comparar);
 
             for(int i=0; i<n; i++){
-                k_l_values.push_back(std::make_tuple(m[i].i,m[i].j,m[i].v));
+                k_l_values.push_back(m[i].v);
             }
             
         }
@@ -676,7 +670,7 @@ class k2_tree
         }
 
         int size(){
-            return k_t.size() + k_l_values.size();
+            return k_t.size() + k_l.size();
         }
 
         int get_index(){
@@ -709,6 +703,10 @@ class k2_tree
 
         int get_k_t_rank(int i){
             return k_t_rank(i);
+        }
+
+        int get_k_l_rank(int i){
+            return k_l_rank(i);
         }
 
         //! Returns the subtree of a tree
@@ -772,15 +770,15 @@ class k2_tree
             }
 
             // Si el índice actual está dentro del rango de k_t
-            std::cout << "size: " << k_t.size() << std::endl;
+            //std::cout << "size: " << k_t.size() << std::endl;
             if (actual < k_t.size() && (actual+i) < k_t.size()) {
-                std::cout << "cond actual+i<k_t.size(): " << (actual+i < k_t.size()) << std::endl;
+                //std::cout << "cond actual+i<k_t.size(): " << (actual+i < k_t.size()) << std::endl;
                 // Verificar que 'actual' esté dentro del rango de k_t y que el bit en k_t[actual] sea 1
                 if (k_t[actual+i] == 1) {
-                    std::cout << "cond k_t[actual+i]==1: " << (k_t[actual+i]==1) << std::endl;
+                    //std::cout << "cond k_t[actual+i]==1: " << (k_t[actual+i]==1) << std::endl;
                     // Calcular el índice del hijo en k_t basado en el rango hasta 'actual' y el índice 'i'
                     // f = rank(actual+i"+1")*k^2
-                    std::cout << "Indice k_t: " << k_t_rank(actual+i+1) * k_k * k_k << std::endl;
+                    //std::cout << "Indice k_t: " << k_t_rank(actual+i+1) * k_k * k_k << std::endl;
                     return k_t_rank(actual+i+1) * k_k * k_k;
                 }
             } else {

@@ -21,11 +21,12 @@ typedef struct{
     int j;
 } position;
 
+// uint64_t parametros de entrada y var loc
 
-position get_reversed_z_order(int z){
-    int i = 0;
-    int j = 0;
-    int bit = 0;
+position get_reversed_z_order(idx_type z){
+    idx_type i = 0;
+    idx_type j = 0;
+    idx_type bit = 0;
     while(z>0){
         i |= (z & 1) << bit;
         z >>= 1;
@@ -39,47 +40,43 @@ position get_reversed_z_order(int z){
     return p;
 }
 
-bool is_root(int pos){
-    return pos == 0;
-}
 
 // suma de k2 trees usando recursion
 // repensar en manera de hacerlo
 // problema con que retornar
+// agregar 2 flags por arbol
+// agregar parametro de i y j para saber en que posicion de matriz estoy
+// aplicar rank sobre el bitvector de las hojas hasta la pos correspondiente
 
-void suma(vector<tuple<idx_type,idx_type,int>> &ret , k2_tree<2>& t1, k2_tree<2>& t2, int pos1, int pos2){
+void suma(vector<tuple<idx_type,idx_type,int>> &ret , k2_tree<2>& t1, k2_tree<2>& t2, int pos1, int pos2, bool flag1, bool flag2, int i, int j){
     // uses recursion to sum the k2 trees
-    string k;
     cout << "estoy en pos1=" << pos1 << "\nestoy en pos2=" << pos2 << endl;
-    cin >> k;
     if(is_leaf(pos1,t1)&&is_leaf(pos2,t2)){
-        int i;
-        i = t1.get_index();
-        position k;
-        cout << 1 << endl;
-        k = get_reversed_z_order(i);
-        if(t1.get_i(i) == k.i && t2.get_i(i) == k.i && t1.get_j(i) == k.j && t2.get_j(i) == k.j){
-            int add = t1.get_v(i) + t2.get_v(i);
-            tuple<idx_type,idx_type,int> r(t1.get_i(i),t1.get_j(i),add);
+        flag1 = true;
+        flag2 = true;
+        if(flag1 && flag2){
+            int d1 = t1.get_k_l_rank(pos1-t1.get_t().size()), d2 = t2.get_k_l_rank(pos2-t2.get_t().size());
+            int add = t1.get_v(d1) + t2.get_v(d2);
+            tuple<idx_type,idx_type,int> r(i,j,add);
             ret.push_back(r);
         }
-        else if(t1.get_i(i) == k.i && t2.get_i(i) == k.i && t1.get_j(i) != k.j && t2.get_j(i) != k.j){
-            int add = t1.get_v(i);
-            tuple<idx_type,idx_type,int> r(t1.get_i(i),t1.get_j(i),add);
+        else if(flag1 && !flag2){
+            int d1 = t1.get_k_l_rank(pos1-t1.get_t().size());
+            int add = t1.get_v(d1);
+            tuple<idx_type,idx_type,int> r(i,j,add);
             ret.push_back(r);
         }
-        else if(t1.get_i(i) != k.i && t2.get_i(i) != k.i && t1.get_j(i) == k.j && t2.get_j(i) == k.j){
-            int add = t2.get_v(i);
-            tuple<idx_type,idx_type,int> r(t2.get_i(i),t2.get_j(i),add);
+        else if(!flag1 && flag2){
+            int d2 = t2.get_k_l_rank(pos2-t2.get_t().size());
+            int add = t2.get_v(d2);
+            tuple<idx_type,idx_type,int> r(i,j,add);
             ret.push_back(r);
         }
-        else{
-            int add = 0;
-        }
-        return;
     }
     else{
         //suma de los elementos de los nodos
+        flag1 = false;
+        flag2 = false;
         int t1c1, t1c2, t1c3, t1c4;
         int t2c1, t2c2, t2c3, t2c4;
         t1c1 = t1.get_child(pos1,0);
@@ -90,15 +87,10 @@ void suma(vector<tuple<idx_type,idx_type,int>> &ret , k2_tree<2>& t1, k2_tree<2>
         t2c2 = t2.get_child(pos2,1);
         t2c3 = t2.get_child(pos2,2);
         t2c4 = t2.get_child(pos2,3);
-        if (t1c1 != -1 && t2c1 != -1) suma(ret, t1, t2, t1c1, t2c1);
-        if (t1c2 != -1 && t2c2 != -1) suma(ret, t1, t2, t1c2, t2c2);
-        if (t1c3 != -1 && t2c3 != -1) suma(ret, t1, t2, t1c3, t2c3);
-        if (t1c4 != -1 && t2c4 != -1) suma(ret, t1, t2, t1c4, t2c4);
-        cout << 13 << endl;
-
-        // cambiar parametro a posicion
-        // preguntar k2_tree.root
-        // t1.child(0)
+        if (t1c1 != -1 && t2c1 != -1) suma(ret, t1, t2, t1c1, t2c1,flag1,flag2,i,j);
+        if (t1c2 != -1 && t2c2 != -1) suma(ret, t1, t2, t1c2, t2c2,flag1,flag2,i,j);
+        if (t1c3 != -1 && t2c3 != -1) suma(ret, t1, t2, t1c3, t2c3,flag1,flag2,i,j);
+        if (t1c4 != -1 && t2c4 != -1) suma(ret, t1, t2, t1c4, t2c4,flag1,flag2,i,j);
     
     }
 }
@@ -155,7 +147,9 @@ void join(vector<tuple<idx_type,idx_type,int>> &ret, vector<tuple<idx_type,idx_t
     }
 }
 
-void multiplicar(vector<tuple<idx_type,idx_type,int>> &ret, k2_tree<2>& t1, k2_tree<2>& t2, int pos1, int pos2){
+// i es fila, j es columna
+
+void multiplicar(vector<tuple<idx_type,idx_type,int>> &ret, k2_tree<2>& t1, k2_tree<2>& t2, int pos1, int pos2,bool flag1, bool flag2){
     vector<tuple<idx_type,idx_type,int>> c1, c2, c3, c4, c5, c6, c7, c8, ret1, ret2, ret3, ret4;
     if(is_leaf(pos1,t1)&&is_leaf(pos2,t2)){
         int i1, i2;
@@ -164,9 +158,9 @@ void multiplicar(vector<tuple<idx_type,idx_type,int>> &ret, k2_tree<2>& t1, k2_t
         position k1, k2;
         k1 = get_reversed_z_order(i1);
         k2 = get_reversed_z_order(i2);
-        if(k1.j == k2.i){
+        if(k1.i == k2.j){
             int add = t1.get_v(i1)*t2.get_v(i2);//comprobar
-            tuple<idx_type,idx_type,int> r(t1.get_i(i1),t2.get_j(i2),add);
+            tuple<idx_type,idx_type,int> r(k1.i,k2.j,add);
             ret.push_back(r);
         }
         else{
@@ -174,14 +168,14 @@ void multiplicar(vector<tuple<idx_type,idx_type,int>> &ret, k2_tree<2>& t1, k2_t
         }
     }
     else{
-            multiplicar(c1,t1,t2,t1.get_child(pos1,0),t2.get_child(pos2,0));
-            multiplicar(c2,t1,t2,t1.get_child(pos1,1),t2.get_child(pos2,2));
-            multiplicar(c3,t1,t2,t1.get_child(pos1,0),t2.get_child(pos2,1));
-            multiplicar(c4,t1,t2,t1.get_child(pos1,1),t2.get_child(pos2,3));
-            multiplicar(c5,t1,t2,t1.get_child(pos1,2),t2.get_child(pos2,0));
-            multiplicar(c6,t1,t2,t1.get_child(pos1,3),t2.get_child(pos2,2));
-            multiplicar(c7,t1,t2,t1.get_child(pos1,2),t2.get_child(pos2,1));
-            multiplicar(c8,t1,t2,t1.get_child(pos1,3),t2.get_child(pos2,3));
+            multiplicar(c1,t1,t2,t1.get_child(pos1,0),t2.get_child(pos2,0),flag1,flag2);
+            multiplicar(c2,t1,t2,t1.get_child(pos1,1),t2.get_child(pos2,2),flag1,flag2);
+            multiplicar(c3,t1,t2,t1.get_child(pos1,0),t2.get_child(pos2,1),flag1,flag2);
+            multiplicar(c4,t1,t2,t1.get_child(pos1,1),t2.get_child(pos2,3),flag1,flag2);
+            multiplicar(c5,t1,t2,t1.get_child(pos1,2),t2.get_child(pos2,0),flag1,flag2);
+            multiplicar(c6,t1,t2,t1.get_child(pos1,3),t2.get_child(pos2,2),flag1,flag2);
+            multiplicar(c7,t1,t2,t1.get_child(pos1,2),t2.get_child(pos2,1),flag1,flag2);
+            multiplicar(c8,t1,t2,t1.get_child(pos1,3),t2.get_child(pos2,3),flag1,flag2);
             k2_tree<2> t3(c1,c1.size());
             k2_tree<2> t4(c2,c2.size());
             k2_tree<2> t5(c3,c3.size());
@@ -190,10 +184,10 @@ void multiplicar(vector<tuple<idx_type,idx_type,int>> &ret, k2_tree<2>& t1, k2_t
             k2_tree<2> t8(c6,c6.size());
             k2_tree<2> t9(c7,c7.size());
             k2_tree<2> t10(c8,c8.size());
-            suma(ret1,t3,t4,0,0);
-            suma(ret2,t5,t6,0,0);
-            suma(ret3,t7,t8,0,0);
-            suma(ret4,t9,t10,0,0);
+            suma(ret1,t3,t4,0,0,false,false,0,0);
+            suma(ret2,t5,t6,0,0,false,false,0,0);
+            suma(ret3,t7,t8,0,0,false,false,0,0);
+            suma(ret4,t9,t10,0,0,false,false,0,0);
             join(ret,ret1,ret2,ret3,ret4);
         }
     
@@ -204,7 +198,7 @@ unsigned int k0, k1;
 k2_tree<2> sumaImpl(k2_tree<2>& t1, k2_tree<2>& t2){
     vector<tuple<idx_type,idx_type,int>> ret;
     k0 = clock();
-    suma(ret,t1,t2,0,0);
+    suma(ret,t1,t2,0,0,false,false,0,0);
     k2_tree<2> t3(ret,ret.size());
     k1 = clock();
     return t3;
@@ -213,7 +207,7 @@ k2_tree<2> sumaImpl(k2_tree<2>& t1, k2_tree<2>& t2){
 k2_tree<2> multiplicarImpl(k2_tree<2>& t1, k2_tree<2>& t2){
     vector<tuple<idx_type,idx_type,int>> ret;
     k0 = clock();
-    multiplicar(ret,t1,t2,0,0);
+    multiplicar(ret,t1,t2,0,0,false,false);
     k2_tree<2> t3(ret,ret.size());
     k1 = clock();
     return t3;
@@ -300,7 +294,7 @@ int main(){
     print_bit_vector(arbol2.get_t());
     print_bit_vector(arbol2.get_l());
 
-    suma(ret,arbol1,arbol2,0,0);
+    suma(ret,arbol1,arbol2,0,0,false,false,0,0);
 
     k2_tree<2> arbol3(ret,ret.size());
 
