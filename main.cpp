@@ -50,10 +50,13 @@ position get_reversed_z_order(idx_type z){
 
 void suma(vector<tuple<idx_type,idx_type,int>> &ret , k2_tree<2>& t1, k2_tree<2>& t2, int pos1, int pos2, bool flag1, bool flag2, int i, int j){
     // uses recursion to sum the k2 trees
-    cout << "estoy en pos1=" << pos1 << "\nestoy en pos2=" << pos2 << endl;
+    //cout << "estoy en pos1=" << pos1 << "\nestoy en pos2=" << pos2 << endl;
     if(is_leaf(pos1,t1)&&is_leaf(pos2,t2)){
         flag1 = true;
         flag2 = true;
+        position p1 = get_reversed_z_order(pos1-t1.get_t().size());
+        i = p1.i;
+        j = p1.j;
         if(flag1 && flag2){
             int d1 = t1.get_k_l_rank(pos1-t1.get_t().size()), d2 = t2.get_k_l_rank(pos2-t2.get_t().size());
             int add = t1.get_v(d1) + t2.get_v(d2);
