@@ -8,7 +8,6 @@
 #include <sdsl/bit_vectors.hpp>
 #include <sdsl/k2_tree_helper.hpp>
 #include <sdsl/int_vector_buffer.hpp>
-#include <sdsl/int_vector.hpp>
 
 using namespace sdsl;
 
@@ -26,8 +25,6 @@ using namespace sdsl;
  *          (pp. 18-30). Springer Berlin Heidelberg.
  */
 
-#include <sdsl/bit_vectors.hpp>
-
 typedef struct{
     int i;
     int j;
@@ -35,12 +32,12 @@ typedef struct{
 } matrix;
 
 
-typedef int data_type;
 typedef uint64_t idx_type;
 
 template<uint8_t k,
          typename t_bv=sdsl::bit_vector,
-         typename t_rank=typename t_bv::rank_1_type>
+         typename t_rank=typename t_bv::rank_1_type,
+         typename data_type= int>
 class k2_tree
 {
     public:
@@ -283,111 +280,6 @@ class k2_tree
             k_l_rank = t_rank(&k_l);
         }
 
-        //! Build a tree from an edges collection
-        /*! This method takes a vector of edges describing the graph
-         *  and the graph size. And takes linear time over the amount of
-         *  edges to build the k_2 representation.
-         *  \param edges A vector with all the edges of the graph, it can
-         *               not be empty.
-         *  \param size Size of the graph, all the nodes in edges must be
-         *              within 0 and size ([0, size[).
-        // */
-        //void build_from_edges(std::vector<std::tuple<idx_type, idx_type>>& edges,
-		//					  const size_type size)
-		//{
-//
-        //    typedef std::tuple<idx_type, idx_type, size_type, idx_type,
-        //            idx_type> t_part_tuple;
-//
-        //    k_k = k;
-        //    k_height = std::ceil(std::log(size)/std::log(k_k));
-        //    k_height = k_height > 1 ? k_height : 1; // If size == 0
-        //    size_type k_2 = std::pow(k_k, 2);
-        //    bit_vector k_t_ = bit_vector(k_2 * k_height * edges.size(), 0);
-        //    bit_vector k_l_;
-//
-        //    std::queue<t_part_tuple> q;
-        //    idx_type t = 0, last_level = 0;
-        //    idx_type i, j, r_0, c_0, it, c, r;
-        //    size_type l = std::pow(k_k, k_height - 1);
-        //    std::vector<idx_type> pos_by_chunk(k_2 + 1, 0);
-//
-        //    q.push(t_part_tuple(0, edges.size(), l, 0, 0));
-//
-        //    while (!q.empty()) {
-        //        std::vector<idx_type> amount_by_chunk(k_2, 0);
-        //        std::tie(i, j, l, r_0, c_0) = q.front();
-        //        q.pop();
-        //        // Get size for each chunk
-        //        for (it = i; it < j; it++)
-        //            amount_by_chunk[k2_tree_ns::get_chunk_idx(
-        //                                std::get<0>(edges[it]), std::get<1>(edges[it]),
-        //                                c_0, r_0, l, k_k)] += 1;
-        //        if (l == 1) {
-        //            if (last_level == 0) {
-        //                last_level = t;
-        //                k_l_ = bit_vector(k_t_.size() - last_level, 0);
-        //                k_t_.resize(last_level);
-        //                last_level = 1; // if t was 0
-        //                t = 0; // Restart counter as we're storing at k_l_ now.
-        //            }
-        //            for (it = 0; it < k_2; it++,t++)
-        //                if (amount_by_chunk[it] != 0)
-        //                    k_l_[t] = 1;
-        //            // At l == 1 we do not put new elements at the queue.
-        //            continue;
-        //        }
-//
-        //        // Set starting position in the vector for each chunk
-        //        pos_by_chunk[0] = i;
-        //        for (it = 1; it < k_2; it++){
-        //            std::cout << pos_by_chunk << std::endl;
-        //            pos_by_chunk[it] =
-        //                pos_by_chunk[it - 1] + amount_by_chunk[it - 1];
-        //        }
-        //        // To handle the last case when it = k_2 - 1
-        //        pos_by_chunk[k_2] = j;
-        //        // Push to the queue every non zero elements chunk
-        //        for (it = 0; it < k_2; it++,t++)
-        //            // If not empty chunk, set bit to 1
-        //            std::cout << amount_by_chunk << std::endl;
-        //            if (amount_by_chunk[it] != 0) {
-        //                r = it / k_k;
-        //                c = it % k_k;
-        //                k_t_[t] = 1;
-        //                std::cout << t << std::endl;
-        //                q.push(t_part_tuple(pos_by_chunk[it],
-        //                                    pos_by_chunk[it + 1],
-        //                                    l/k_k,
-        //                                    r_0 + r * l,
-        //                                    c_0 + c * l));
-        //            }
-        //        idx_type chunk;
-//
-        //        // Sort edges' vector
-        //        for (unsigned ch = 0; ch < k_2; ch++) {
-        //            idx_type be = ch == 0 ? i : pos_by_chunk[ch - 1];
-        //            for (it = pos_by_chunk[ch]; it < be + amount_by_chunk[ch];) {
-        //                chunk = k2_tree_ns::get_chunk_idx(
-        //                            std::get<0>(edges[it]), std::get<1>(edges[it]),
-        //                            c_0, r_0, l, k_k);
-//
-        //                if (pos_by_chunk[chunk] != it)
-        //                    std::iter_swap(edges.begin() + it,
-        //                                   edges.begin() + pos_by_chunk[chunk]);
-        //                else
-        //                    it++;
-        //                pos_by_chunk[chunk]++;
-        //            }
-        //        }
-        //    }
-        //    k_l_.resize(t);
-        //    k2_tree_ns::build_template_vector<t_bv>(k_t_, k_l_, k_t, k_l);
-//
-        //    k_t_rank = t_rank(&k_t);
-//
-		//}
-//
         void SelectionSort(std::vector<std::tuple<idx_type, idx_type,int>>& array){
             int i, j, minIndex;
             std::tuple<idx_type, idx_type, int> tmp;
@@ -567,8 +459,8 @@ class k2_tree
             return *this;
         }
         
-
-        int get_v(int v){
+        //uint64_t
+        data_type get_v(idx_type v){
             return k_l_values[v];
         }
 
@@ -709,89 +601,50 @@ class k2_tree
             return k_l_rank(i);
         }
 
-        //! Returns the subtree of a tree
-        /*!
-         *  \param i Node to get the subtree from.
-         *  \returns A k2_tree representing the subtree of node i.
-         */
-        k2_tree subtree(idx_type i) const
-        {
-            if (k_t.size() == 0 && k_l.size() == 0)
-                return k2_tree();
-            size_type n = std::pow(k_k, k_height - 1);
-            size_type k_2 = std::pow(k_k, 2);
-            idx_type col, row;
-
-            // This is duplicated to avoid an extra if at the loop. As idx_type
-            // is unsigned and rank has an offset of one, is not possible to run
-            // k_t_rank with zero as parameter at the first iteration.
-            row = std::floor(i/static_cast<double>(n));
-            col = std::floor(i/static_cast<double>(n));
-            i = i % n;
-            idx_type level = k_k * row + col;
-            n = n/k_k;
-
-            while (level < k_t.size()) {
-                if (k_t[level] == 0)
-                    return k2_tree();
-                row = std::floor(i/static_cast<double>(n));
-                col = std::floor(i/static_cast<double>(n));
-                i = i % n;
-                level = k_t_rank(level + 1) * k_2 + k_k * row + col;
-                n = n/k_k;
-            }
-
-            k2_tree res;
-            res.k_t = k_t.sub_bv(level + 1, k_t.size() - level - 1);
-            res.k_l = k_l;
-            res.k_t_rank = t_rank(&res.k_t);
-            res.k_k = k_k;
-            res.k_height = k_height - (level + 1)/k_2;
-            return res;
-        }
-
-        // returns position on array tree
-
-        //get a child
-        //int get_child(int actual, int i){
-        //    if(i < k_t.bit_size() && k_l[actual-k_t.bit_size()] == 1){
-        //        return i;
-        //    }else{
-        //        return k_t_rank(actual + 1) * k_k * k_k + i;
-        //    }
-        //}
-
         int get_child(int a, int i) {
-            // Verificar que 'actual' e 'i' estén dentro de los límites esperados
+            std::cout << "get_child called with a=" << a << ", i=" << i << std::endl;
+
+            // Verificar que 'a' e 'i' estén dentro de los límites esperados
             idx_type actual = static_cast<idx_type>(a);
+            std::cout << "actual=" << actual << std::endl;
+
+            // Comprobar que actual está dentro del rango de los bit vectors
             if (actual < 0 || i < 0 || actual >= k_t.size() + k_l.size()) {
                 std::cout << "Error: Índices fuera de rango" << std::endl;
-                return -1;  // Valor de retorno para indicar un error
+                return -1;  // Retornar -1 si hay un índice fuera de rango
             }
 
-            // Si el índice actual está dentro del rango de k_t
-            //std::cout << "size: " << k_t.size() << std::endl;
-            if (actual < k_t.size() && (actual+i) < k_t.size()) {
-                //std::cout << "cond actual+i<k_t.size(): " << (actual+i < k_t.size()) << std::endl;
-                // Verificar que 'actual' esté dentro del rango de k_t y que el bit en k_t[actual] sea 1
-                if (k_t[actual+i] == 1) {
-                    //std::cout << "cond k_t[actual+i]==1: " << (k_t[actual+i]==1) << std::endl;
-                    // Calcular el índice del hijo en k_t basado en el rango hasta 'actual' y el índice 'i'
-                    // f = rank(actual+i"+1")*k^2
-                    //std::cout << "Indice k_t: " << k_t_rank(actual+i+1) * k_k * k_k << std::endl;
-                    return k_t_rank(actual+i+1) * k_k * k_k;
+            // Si el índice está dentro del rango de `k_t`
+            if (actual < k_t.size()) {
+                // Verificar si actual + i está dentro del rango válido
+                if ((actual + i) >= k_t.size()) {
+                    std::cout << "Error: Índice k_t fuera de rango" << std::endl;
+                    return -1;  // Retornar -1 si está fuera de rango
                 }
-            } else {
-                // Si el índice actual está en el rango de las hojas (k_l)
-                int leaf_index = actual - k_t.size();
-                if (leaf_index < k_l.size() && k_l[leaf_index] == 1) {
-                    std::cout << "Indice hoja" << i << std::endl;
-                    return i;
+
+                // Verificar si el bit actual es 1
+                if (k_t[actual + i] == 1) {
+                    // Calcular el hijo utilizando `rank`
+                    idx_type rank_val = k_t_rank(actual + i + 1);
+                    std::cout << "rank_val=" << rank_val << std::endl;
+                    if (rank_val * k_k * k_k >= k_t.size() + k_l.size()) {
+                        std::cout << "Error: Rank calculado fuera de rango" << std::endl;
+                        return -1;  // Evitar acceder fuera de los límites
+                    }
+                    return rank_val * k_k * k_k;  // Retornar el índice del hijo
+                } else {
+                    return -1;  // No hay hijo, retornar -1
                 }
             }
 
-            // Retornar -1 si no se encuentra un hijo válido
-            std::cout << "Error: No se encontró un hijo válido" << std::endl;
+            int leaf_index = actual - k_t.size();
+            std::cout << "leaf_index=" << leaf_index << std::endl;
+            if (leaf_index < k_l.size()) {
+                // El valor en `k_l` es 1, retornar el índice `i`
+                return i;
+            }
+
+            // Retornar -1 si no se cumple ninguna de las condiciones anteriores
             return -1;
         }
 
