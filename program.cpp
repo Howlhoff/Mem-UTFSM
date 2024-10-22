@@ -4,7 +4,6 @@
 #include <iostream>
 #include <fstream>
 
-
 using namespace std;
 
 typedef uint64_t idx_type;

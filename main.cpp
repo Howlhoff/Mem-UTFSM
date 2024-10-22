@@ -26,6 +26,23 @@ typedef struct{
 
 // uint64_t parametros de entrada y var loc
 
+position get_reversed_z_order(idx_type z){
+    idx_type i = 0;
+    idx_type j = 0;
+    idx_type bit = 0;
+    while(z>0){
+        i |= (z & 1) << bit;
+        z >>= 1;
+        j |= (z & 1) << bit;
+        z >>= 1;
+        bit++;
+    }
+    position p;
+    p.i = i;
+    p.j = j;
+    return p;
+}
+
 // suma de k2 trees usando recursion
 
 void suma(vector<tuple<idx_type,idx_type,int>> &ret , k2_tree<2>& t1, k2_tree<2>& t2, int pos1, int pos2, bool flag1, bool flag2, idx_type i, idx_type j){

@@ -1,12 +1,12 @@
-#ifndef INCLUDED_SDSL_K2_TREE
-#define INCLUDED_SDSL_K2_TREE
+#ifndef K2_TREE_HPP
+#define K2_TREE_HPP
 
 #include <deque>
 #include <queue>
 #include <stdexcept>
 #include <tuple>
 #include <sdsl/bit_vectors.hpp>
-#include <sdsl/k2_tree_helper.hpp>
+#include "k2_tree_helper.hpp"
 #include <sdsl/int_vector_buffer.hpp>
 
 using namespace sdsl;
