@@ -601,43 +601,41 @@ class k2_tree
             return k_l_rank(i);
         }
 
-        int get_child(int a, int i) {
+        idx_type get_child(idx_type a, idx_type i) {
             std::cout << "get_child called with a=" << a << ", i=" << i << std::endl;
 
-            // Verificar que 'a' e 'i' estén dentro de los límites esperados
-            idx_type actual = static_cast<idx_type>(a);
-            std::cout << "actual=" << actual << std::endl;
+            std::cout << "actual=" << a << std::endl;
 
             // Comprobar que actual está dentro del rango de los bit vectors
-            if (actual < 0 || i < 0 || actual >= k_t.size() + k_l.size()) {
+            if (a < 0 || i < 0 || a >= k_t.size() + k_l.size()) {
                 std::cout << "Error: Índices fuera de rango" << std::endl;
                 return -1;  // Retornar -1 si hay un índice fuera de rango
             }
 
             // Si el índice está dentro del rango de `k_t`
-            if (actual < k_t.size()) {
+            if (a < k_t.size()) {
                 // Verificar si actual + i está dentro del rango válido
-                if ((actual + i) >= k_t.size()) {
+                if ((a + i) >= k_t.size()) {
                     std::cout << "Error: Índice k_t fuera de rango" << std::endl;
                     return -1;  // Retornar -1 si está fuera de rango
                 }
 
                 // Verificar si el bit actual es 1
-                if (k_t[actual + i] == 1) {
+                if (k_t[a] == 1) {
                     // Calcular el hijo utilizando `rank`
-                    idx_type rank_val = k_t_rank(actual + i + 1);
+                    idx_type rank_val = k_t_rank(a+1);
                     std::cout << "rank_val=" << rank_val << std::endl;
                     if (rank_val * k_k * k_k >= k_t.size() + k_l.size()) {
                         std::cout << "Error: Rank calculado fuera de rango" << std::endl;
                         return -1;  // Evitar acceder fuera de los límites
                     }
-                    return rank_val * k_k * k_k;  // Retornar el índice del hijo
+                    return rank_val * k_k * k_k + i;  // Retornar el índice del hijo
                 } else {
                     return -1;  // No hay hijo, retornar -1
                 }
             }
 
-            int leaf_index = actual - k_t.size();
+            int leaf_index = a - k_t.size();
             std::cout << "leaf_index=" << leaf_index << std::endl;
             if (leaf_index < k_l.size()) {
                 // El valor en `k_l` es 1, retornar el índice `i`
