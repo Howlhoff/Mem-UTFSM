@@ -374,7 +374,7 @@ int main(){
     print_bit_vector(arbol2.get_t());
     print_bit_vector(arbol2.get_l());
 
-    idx_type i = 1, j = 1;
+    idx_type i = 0, j = 0;
 
     suma(ret,arbol1,arbol2,0,0,false,false,i,j);
 
