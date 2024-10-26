@@ -614,18 +614,12 @@ class k2_tree
 
             // Si el índice está dentro del rango de `k_t`
             if (a < k_t.size()) {
-                // Verificar si actual + i está dentro del rango válido
-                if ((a + i) >= k_t.size()) {
-                    std::cout << "Error: Índice k_t fuera de rango" << std::endl;
-                    return -1;  // Retornar -1 si está fuera de rango
-                }
-
                 // Verificar si el bit actual es 1
                 if (k_t[a] == 1) {
                     // Calcular el hijo utilizando `rank`
                     idx_type rank_val = k_t_rank(a+1);
                     std::cout << "rank_val=" << rank_val << std::endl;
-                    if (rank_val * k_k * k_k >= k_t.size() + k_l.size()) {
+                    if (rank_val * k_k * k_k + i >= k_t.size() + k_l.size()) {
                         std::cout << "Error: Rank calculado fuera de rango" << std::endl;
                         return -1;  // Evitar acceder fuera de los límites
                     }
