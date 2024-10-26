@@ -359,7 +359,9 @@ class k2_tree
 
             build_from_edges(edges, size);
 
-            SelectionSort(array);
+            sort(array.begin(),array.end(), new_sort);
+
+            //SelectionSort(array);
 
             for(int i=0; i<array.size(); i++){
                 k_l_values.push_back(std::get<2>(array[i]));
