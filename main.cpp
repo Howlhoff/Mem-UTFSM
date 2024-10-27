@@ -100,20 +100,16 @@ void suma(vector<tuple<idx_type,idx_type,int>> &ret , k2_tree<2>& t1, k2_tree<2>
     auto l1 = t1.get_l();
     auto l2 = t2.get_l();
     cout << "Antes de shifteo, i=" << i << ", j=" << j << endl;
-    if(is_leaf(pos1,t1) && is_leaf(pos2,t2)){
+    if(is_leaf(pos1,t1)){
         flag1 = true;
-        flag2 = true;
-    }
-    else if(is_leaf(pos1,t1) && !is_leaf(pos2,t2)){
-        flag1 = true;
-        flag2 = false;
-    }
-    else if(!is_leaf(pos1,t1) && is_leaf(pos2,t2)){
-        flag1 = false;
-        flag2 = true;
     }
     else{
         flag1 = false;
+    }
+    if(is_leaf(pos2,t2)){
+        flag2 = true;
+    }
+    else{
         flag2 = false;
     }
     if(flag1 && flag2){
@@ -141,40 +137,6 @@ void suma(vector<tuple<idx_type,idx_type,int>> &ret , k2_tree<2>& t1, k2_tree<2>
     else{
         //suma de los elementos de los nodos
         cout << "pos1=" << pos1 << ", pos2=" << pos2 << endl;
-        //int t1c1 = (pos1 != -1) ? t1.get_child(pos1, 0) : -1;
-        //int t2c1 = (pos2 != -1) ? t2.get_child(pos2, 0) : -1;
-        //int t1c2 = (pos1 != -1) ? t1.get_child(pos1, 1) : -1;
-        //int t2c2 = (pos2 != -1) ? t2.get_child(pos2, 1) : -1;
-        //int t1c3 = (pos1 != -1) ? t1.get_child(pos1, 2) : -1;
-        //int t2c3 = (pos2 != -1) ? t2.get_child(pos2, 2) : -1;
-        //int t1c4 = (pos1 != -1) ? t1.get_child(pos1, 3) : -1;
-        //int t2c4 = (pos2 != -1) ? t2.get_child(pos2, 3) : -1;
-//
-        //idx_type i1 = (i << 1) | 0ULL;
-        //idx_type j1 = (j << 1) | 0ULL;
-        //if (t1c1 != -1 || t2c1 != -1) {
-        //    suma(ret, t1, t2, t1c1 != -1 ? t1c1 : -1, t2c1 != -1 ? t2c1 : -1, flag1, flag2, i1, j1);
-        //}
-//
-        //idx_type i2 = (i << 1) | 0ULL;
-        //idx_type j2 = (j << 1) | 1ULL;
-        //if (t1c2 != -1 || t2c2 != -1) {
-        //    suma(ret, t1, t2, t1c2 != -1 ? t1c2 : -1, t2c2 != -1 ? t2c2 : -1, flag1, flag2, i2, j2);
-        //}
-//
-        //idx_type i3 = (i << 1) | 1ULL;
-        //idx_type j3 = (j << 1) | 0ULL;
-        //if (t1c3 != -1 || t2c3 != -1) {
-        //    suma(ret, t1, t2, t1c3 != -1 ? t1c3 : -1, t2c3 != -1 ? t2c3 : -1, flag1, flag2, i3, j3);
-        //}
-//
-        //idx_type i4 = (i << 1) | 1ULL;
-        //idx_type j4 = (j << 1) | 1ULL;
-        //if (t1c4 != -1 || t2c4 != -1) {
-        //    suma(ret, t1, t2, t1c4 != -1 ? t1c4 : -1, t2c4 != -1 ? t2c4 : -1, flag1, flag2, i4, j4);
-        //}
-
-        //cambios
 
         for(int k=0; k<4; k++){
             int c1 = (pos1 != -1) ? t1.get_child(pos1, k) : -1;
@@ -196,39 +158,40 @@ void suma_test(vector<tuple<idx_type, idx_type, int>>& ret, k2_tree<2>& t1, k2_t
     if(pos1 == -1 && pos2 == -1) {
         return;
     }
-    if(is_leaf(pos1,t1) && is_leaf(pos2,t2)){
+    if(is_leaf(pos1,t1)){
         flag1 = true;
-        flag2 = true;
-    }
-    else if(is_leaf(pos1,t1) && !is_leaf(pos2,t2)){
-        flag1 = true;
-        flag2 = false;
-    }
-    else if(!is_leaf(pos1,t1) && is_leaf(pos2,t2)){
-        flag1 = false;
-        flag2 = true;
     }
     else{
         flag1 = false;
+    }
+    if(is_leaf(pos2,t2)){
+        flag2 = true;
+    }
+    else{
         flag2 = false;
     }
     if(flag1 && flag2){
         //uint64_t
         cout << "i=" << i << ", j=" << j << endl;
-        if(t1.get_l()[pos1-t1.get_t().size()] == 1 && t2.get_l()[pos2-t2.get_t().size()] == 1){
-            idx_type d1 = t1.get_k_l_rank(pos1-t1.get_t().size()), d2 = t2.get_k_l_rank(pos2-t2.get_t().size());
+        auto index1 = pos1-t1.get_t().size();
+        auto index2 = pos2-t2.get_t().size();
+        if(t1.get_l()[index1] == 1 && t2.get_l()[index2] == 1){
+            idx_type d1 = t1.get_k_l_rank(index1), d2 = t2.get_k_l_rank(index2);
+            cout << "v1=" << t1.get_v(d1) << ", v2=" << t2.get_v(d2) << endl;
             auto add = t1.get_v(d1) + t2.get_v(d2);
             tuple<idx_type,idx_type,int> r(i,j,add);
             ret.push_back(r);
         }
-        else if(t1.get_l()[pos1-t1.get_t().size()] == 1 && t2.get_l()[pos2-t2.get_t().size()] == 0){
-            idx_type d1 = t1.get_k_l_rank(pos1-t1.get_t().size());
+        else if(t1.get_l()[index1] == 1 && t2.get_l()[index2] == 0){
+            idx_type d1 = t1.get_k_l_rank(index1);
+            cout << "v1=" << t1.get_v(d1) << endl;
             auto add = t1.get_v(d1);
             tuple<idx_type,idx_type,int> r(i,j,add);
             ret.push_back(r);
         }
-        else if(t1.get_l()[pos1-t1.get_t().size()] == 0 && t2.get_l()[pos2-t2.get_t().size()] == 1){
-            idx_type d2 = t2.get_k_l_rank(pos2-t2.get_t().size());
+        else if(t1.get_l()[index1] == 0 && t2.get_l()[index2] == 1){
+            idx_type d2 = t2.get_k_l_rank(index2);
+            cout << "v2=" << t2.get_v(d2) << endl;
             auto add = t2.get_v(d2);
             tuple<idx_type,idx_type,int> r(i,j,add);
             ret.push_back(r);
@@ -236,14 +199,10 @@ void suma_test(vector<tuple<idx_type, idx_type, int>>& ret, k2_tree<2>& t1, k2_t
         else{
             return;
         }
-        //idx_type d1 = t1.get_k_l_rank(pos1-t1.get_t().size()), d2 = t2.get_k_l_rank(pos2-t2.get_t().size());
-        //auto add = t1.get_v(d1) + t2.get_v(d2);
-        //tuple<idx_type,idx_type,int> r(i,j,add);
-        //ret.push_back(r);
     }
     else if(flag1 && !flag2){
         cout << "i=" << i << ", j=" << j << endl;
-        if(t1.get_l()[pos1-t1.get_t().size()] == 1 && t2.get_l()[pos2-t2.get_t().size()] == 0){
+        if(t1.get_l()[pos1-t1.get_t().size()] == 1){
             idx_type d1 = t1.get_k_l_rank(pos1-t1.get_t().size());
             auto add = t1.get_v(d1);
             tuple<idx_type,idx_type,int> r(i,j,add);
@@ -256,7 +215,7 @@ void suma_test(vector<tuple<idx_type, idx_type, int>>& ret, k2_tree<2>& t1, k2_t
     }
     else if(!flag1 && flag2){
         cout << "i=" << i << ", j=" << j << endl;
-        if(t1.get_l()[pos1-t1.get_t().size()] == 0 && t2.get_l()[pos2-t2.get_t().size()] == 1){
+        if(t2.get_l()[pos2-t2.get_t().size()] == 1){
             idx_type d2 = t2.get_k_l_rank(pos2-t2.get_t().size());
             auto add = t2.get_v(d2);
             tuple<idx_type,idx_type,int> r(i,j,add);
@@ -298,7 +257,6 @@ void suma_test(vector<tuple<idx_type, idx_type, int>>& ret, k2_tree<2>& t1, k2_t
         }
     }
 }
-
 
 //join 4 vector tuples into a single vector without element repetition
 void join(vector<tuple<idx_type,idx_type,int>> &ret, vector<tuple<idx_type,idx_type,int>> &ret1, vector<tuple<idx_type,idx_type,int>> &ret2, vector<tuple<idx_type,idx_type,int>> &ret3, vector<tuple<idx_type,idx_type,int>> &ret4){
@@ -389,12 +347,44 @@ void print_bit_vector(const bit_vector &bv) {
     std::cout << std::endl;
 }
 
+void print_from_list_to_matrix(vector<tuple<idx_type,idx_type,int>> m){
+    //print a matrix from a list of tuples
+    int n = 0;
+    for(int i=0; i<m.size(); i++){
+        if(get<0>(m[i]) > n){
+            n = get<0>(m[i]);
+        }
+    }
+    n++;
+    vector<vector<int>> matrix(n,vector<int>(n,0));
+    for(int i=0; i<m.size(); i++){
+        matrix[get<0>(m[i])][get<1>(m[i])] = get<2>(m[i]);
+    }
+    for(int i=0; i<n; i++){
+        for(int j=0; j<n; j++){
+            cout << matrix[i][j] << " ";
+        }
+        cout << endl;
+    }
+}
+
 int main(){
-    vector<tuple<idx_type,idx_type,int>> m1 = {{0,0,1},{1,1,2},{2,3,4},{3,0,3},{3,1,1},{1,2,8}};
-    vector<tuple<idx_type,idx_type,int>> m2 = {{2,0,2},{3,0,1},{3,1,1},{0,2,2},{3,3,1}}; 
+    vector<tuple<idx_type,idx_type,int>> m1 = {{0,0,1},{1,1,2},{0,3,3},{1,3,1},{2,1,8},{3,2,4}};
+    vector<tuple<idx_type,idx_type,int>> m2 = {{0,2,2},{0,3,1},{1,3,1},{2,0,2},{3,3,1}}; 
 
     k2_tree<2> arbol1(m1,m1.size());
     k2_tree<2> arbol2(m2,m2.size());
+
+    for(int i=0; i<arbol1.get_l_values().size(); i++){
+        cout << arbol1.get_v(i) << endl;
+    }
+
+    cout << "//" <<endl;
+
+    
+    for(int i=0; i<arbol2.get_l_values().size(); i++){
+        cout << arbol2.get_v(i) << endl;
+    }
 
     cout << "test" << endl;
 
@@ -407,7 +397,7 @@ int main(){
 
     idx_type i = 0, j = 0;
 
-    suma(ret,arbol1,arbol2,0,0,false,false,i,j);
+    suma_test(ret,arbol1,arbol2,0,0,false,false,i,j);
 
     k2_tree<2> arbol3(ret,ret.size());
 
@@ -415,9 +405,12 @@ int main(){
     print_bit_vector(arbol3.get_l());
 
     //print ret
-    for(int i=0; i<ret.size(); i++){
-        cout << get<0>(ret[i]) << " " << get<1>(ret[i]) << " " << get<2>(ret[i]) << endl;
-    }
+    cout << "m1" << endl;
+    print_from_list_to_matrix(m1);
+    cout << "m2" << endl;
+    print_from_list_to_matrix(m2);
+    cout << "ret" << endl;
+    print_from_list_to_matrix(ret);
 
     cout << "n=" << ret.size() << endl;
 

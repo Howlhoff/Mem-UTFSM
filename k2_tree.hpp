@@ -616,6 +616,10 @@ class k2_tree
 
             // Si el índice está dentro del rango de `k_t`
             if (a < k_t.size()) {
+                if ((a + i) >= k_t.size()+k_l.size()) {
+                    std::cout << "Error: Índice k_t fuera de rango" << std::endl;
+                    return -1;
+                }
                 // Verificar si el bit actual es 1
                 if (k_t[a] == 1) {
                     // Calcular el hijo utilizando `rank`
@@ -633,7 +637,7 @@ class k2_tree
 
             int leaf_index = a - k_t.size();
             std::cout << "leaf_index=" << leaf_index << std::endl;
-            if (leaf_index < k_l.size()) {
+            if (leaf_index < k_l.size() ) {
                 // El valor en `k_l` es 1, retornar el índice `i`
                 return i;
             }
