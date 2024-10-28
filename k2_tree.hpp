@@ -106,22 +106,23 @@ class k2_tree
 
             k2_tree_ns::build_template_vector<t_bv>(k_t_, k_l_, k_t, k_l);
         }
-        static idx_type zOrder(idx_type i, idx_type j){
-            // n: Numero maximo de bits a procesar
-            idx_type n = 8*sizeof(idx_type), z = 0;
 
-            idx_type bit = 0;
-            
-            while(bit < n){
-                // Aqui se recorren los bits de las posiciones i y j
-                idx_type ib = (i>>bit)&1;
-                idx_type jb = (j>>bit)&1;
-                // Operacion para encontrar el bit de la secuencia zOrder de i y j
-                z |= (ib << (2*bit)) | (jb << (2*bit+1));
-                
-                bit++;
-            }
+        static idx_type interleave(uint32_t x) {
+            uint64_t z = x;
+            z = (z | (z << 16)) & 0x0000FFFF0000FFFF;
+            z = (z | (z << 8)) & 0x00FF00FF00FF00FF;
+            z = (z | (z << 4)) & 0x0F0F0F0F0F0F0F0F;
+            z = (z | (z << 2)) & 0x3333333333333333;
+            z = (z | (z << 1)) & 0x5555555555555555;
             return z;
+        }
+        static idx_type zOrder(idx_type x, idx_type y){
+            // n: Numero maximo de bits a procesar
+
+            uint32_t x_low = static_cast<uint32_t>(x);
+            uint32_t y_low = static_cast<uint32_t>(y);
+
+            return (interleave(y_low) | (interleave(x_low) << 1));        
         }
 
 

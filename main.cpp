@@ -368,24 +368,23 @@ void print_from_list_to_matrix(vector<tuple<idx_type,idx_type,int>> m){
     }
 }
 
+void print_vector(vector<int> v){
+    for(int i=0; i<v.size(); i++){
+        cout << v[i] << " ";
+    }
+    cout << endl;
+}
+
 int main(){
     vector<tuple<idx_type,idx_type,int>> m1 = {{0,0,1},{1,1,2},{0,3,3},{1,3,1},{2,1,8},{3,2,4}};
     vector<tuple<idx_type,idx_type,int>> m2 = {{0,2,2},{0,3,1},{1,3,1},{2,0,2},{3,3,1}}; 
-
+    
     k2_tree<2> arbol1(m1,m1.size());
     k2_tree<2> arbol2(m2,m2.size());
 
-    for(int i=0; i<arbol1.get_l_values().size(); i++){
-        cout << arbol1.get_v(i) << endl;
-    }
-
-    cout << "//" <<endl;
-
+    print_vector(arbol1.get_l_values());
+    print_vector(arbol2.get_l_values());
     
-    for(int i=0; i<arbol2.get_l_values().size(); i++){
-        cout << arbol2.get_v(i) << endl;
-    }
-
     cout << "test" << endl;
 
     vector<tuple<idx_type,idx_type,int>> ret;
