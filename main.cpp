@@ -91,70 +91,7 @@ position shifting(idx_type i, idx_type j, int k){
 
 // suma de k2 trees usando recursion
 
-void suma(vector<tuple<idx_type,idx_type,int>> &ret , k2_tree<2>& t1, k2_tree<2>& t2, int pos1, int pos2, bool flag1, bool flag2, idx_type i, idx_type j){
-    if(pos1 == -1 && pos2 == -1){
-        return;
-    }
-    auto p1 = t1.get_t();
-    auto p2 = t2.get_t();
-    auto l1 = t1.get_l();
-    auto l2 = t2.get_l();
-    cout << "Antes de shifteo, i=" << i << ", j=" << j << endl;
-    if(is_leaf(pos1,t1)){
-        flag1 = true;
-    }
-    else{
-        flag1 = false;
-    }
-    if(is_leaf(pos2,t2)){
-        flag2 = true;
-    }
-    else{
-        flag2 = false;
-    }
-    if(flag1 && flag2){
-        //uint64_t
-        cout << "i=" << i << ", j=" << j << endl;
-        idx_type d1 = t1.get_k_l_rank(pos1-t1.get_t().size()), d2 = t2.get_k_l_rank(pos2-t2.get_t().size());
-        auto add = t1.get_v(d1) + t2.get_v(d2);
-        tuple<idx_type,idx_type,int> r(i,j,add);
-        ret.push_back(r);
-    }
-    else if(flag1 && !flag2){
-        cout << "i=" << i << ", j=" << j << endl;
-        idx_type d1 = t1.get_k_l_rank(pos1-t1.get_t().size());
-        auto add = t1.get_v(d1);
-        tuple<idx_type,idx_type,int> r(i,j,add);
-        ret.push_back(r);
-    }
-    else if(!flag1 && flag2){
-        cout << "i=" << i << ", j=" << j << endl;
-        idx_type d2 = t2.get_k_l_rank(pos2-t2.get_t().size());
-        auto add = t2.get_v(d2);
-        tuple<idx_type,idx_type,int> r(i,j,add);
-        ret.push_back(r);
-    } // else if is zero and doesnt add to the vector
-    else{
-        //suma de los elementos de los nodos
-        cout << "pos1=" << pos1 << ", pos2=" << pos2 << endl;
-
-        for(int k=0; k<4; k++){
-            int c1 = (pos1 != -1) ? t1.get_child(pos1, k) : -1;
-            int c2 = (pos2 != -1) ? t2.get_child(pos2, k) : -1;
-            position p = shifting(i,j,k);
-            if(c1 != -1 || c2 != -1){
-                suma(ret,t1,t2,c1 != -1 ? c1 : -1,c2 =! -1 ? c2 : -1,flag1,flag2,p.i,p.j);
-            }
-            else{
-                return;
-            }
-
-        }
-    
-    }
-}
-
-void suma_test(vector<tuple<idx_type, idx_type, int>>& ret, k2_tree<2>& t1, k2_tree<2>& t2, idx_type pos1, idx_type pos2, bool flag1, bool flag2, idx_type i, idx_type j) {
+void suma(vector<tuple<idx_type, idx_type, int>>& ret, k2_tree<2>& t1, k2_tree<2>& t2, idx_type pos1, idx_type pos2, bool flag1, bool flag2, idx_type i, idx_type j) {
     if(pos1 == -1 && pos2 == -1) {
         return;
     }
@@ -244,16 +181,16 @@ void suma_test(vector<tuple<idx_type, idx_type, int>>& ret, k2_tree<2>& t1, k2_t
         idx_type i1 = (i << 1);
         idx_type j1 = (j << 1);
         if (t1c1 != -1 || t2c1 != -1) {
-            suma_test(ret, t1, t2, t1c1, t2c1, flag1, flag2, i1 | 0ULL, j1 | 0ULL);
+            suma(ret, t1, t2, t1c1, t2c1, flag1, flag2, i1 | 0ULL, j1 | 0ULL);
         }
         if (t1c2 != -1 || t2c2 != -1) {
-            suma_test(ret, t1, t2, t1c2, t2c2, flag1, flag2, i1 | 0ULL, j1 | 1ULL);
+            suma(ret, t1, t2, t1c2, t2c2, flag1, flag2, i1 | 0ULL, j1 | 1ULL);
         }
         if (t1c3 != -1 || t2c3 != -1) {
-            suma_test(ret, t1, t2, t1c3, t2c3, flag1, flag2, i1 | 1ULL, j1 | 0ULL);
+            suma(ret, t1, t2, t1c3, t2c3, flag1, flag2, i1 | 1ULL, j1 | 0ULL);
         }
         if (t1c4 != -1 || t2c4 != -1) {
-            suma_test(ret, t1, t2, t1c4, t2c4, flag1, flag2, i1 | 1ULL, j1 | 1ULL);
+            suma(ret, t1, t2, t1c4, t2c4, flag1, flag2, i1 | 1ULL, j1 | 1ULL);
         }
     }
 }
@@ -278,7 +215,7 @@ void join(vector<tuple<idx_type,idx_type,int>> &ret, vector<tuple<idx_type,idx_t
 
 void multiplicar(vector<tuple<idx_type,idx_type,int>> &ret, k2_tree<2>& t1, k2_tree<2>& t2, int pos1, int pos2, bool flag1, bool flag2){
     vector<tuple<idx_type,idx_type,int>> c1, c2, c3, c4, c5, c6, c7, c8, ret1, ret2, ret3, ret4;
-    if(is_leaf_1(pos1,t1)&&is_leaf_1(pos2,t2)){
+    if(is_leaf(pos1,t1)&&is_leaf(pos2,t2)){
         idx_type i1 = t1.get_k_l_rank(pos1-t1.get_t().size());
         idx_type i2 = t2.get_k_l_rank(pos2-t2.get_t().size());
         position k1, k2;
@@ -396,7 +333,7 @@ int main(){
 
     idx_type i = 0, j = 0;
 
-    suma_test(ret,arbol1,arbol2,0,0,false,false,i,j);
+    suma(ret,arbol1,arbol2,0,0,false,false,i,j);
 
     k2_tree<2> arbol3(ret,ret.size());
 
