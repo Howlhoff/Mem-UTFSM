@@ -301,15 +301,19 @@ void multiplicar_helper(vector<tuple<idx_type,idx_type,int>>& ret, k2_tree<2>& t
         idx_type i1 = (i << 1);
         idx_type j1 = (j << 1);
         if (t1c1 != -1 || t2c1 != -1 || t1c2 != -1 || t2c3 != -1) {
+            //C11 = A11*B11 + A12*B21
             multiplicar_helper(ret, t1, t2, t1c1, t1c2, t2c1, t2c3, flag1, flag2, i1 | 0ULL, j1 | 0ULL);
         }
         if (t1c2 != -1 || t2c2 != -1 || t1c2 != -1 || t2c4 != -1) {
+            //C12 = A11*B12 + A12*B22
             multiplicar_helper(ret, t1, t2, t1c1, t1c2, t2c2, t2c4, flag1, flag2, i1 | 0ULL, j1 | 1ULL);
         }
         if (t1c3 != -1 || t2c1 != -1 || t1c4 != -1 || t2c3 != -1) {
+            //C21 = A21*B11 + A22*B21
             multiplicar_helper(ret, t1, t2, t1c3, t1c4, t2c1, t2c3, flag1, flag2, i1 | 1ULL, j1 | 0ULL);
         }
         if (t1c4 != -1 || t2c2 != -1 || t1c4 != -1 || t2c4 != -1) {
+            //C22 = A21*B12 + A22*B22
             multiplicar_helper(ret, t1, t2, t1c3, t1c4, t2c2, t2c4, flag1, flag2, i1 | 1ULL, j1 | 1ULL);
         }
     }    
