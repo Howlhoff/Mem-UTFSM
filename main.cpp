@@ -281,11 +281,12 @@ void multiplicar_helper(vector<tuple<idx_type,idx_type,int>>& ret, k2_tree<2>& t
         flag2 = false;
     }
     if(flag1 && flag2){
+        //For every 2x2 matrix with no-null elements
         mult_squared_mat(ret,t1,t2,pos11,pos21,flag1,flag2,i,j);
         mult_squared_mat(ret,t1,t2,pos12,pos22,flag1,flag2,i,j);
     }
     else{
-        //Para cada submatriz A de 2x2, A*0=0, 0*A=0, con 0 una matriz de puros 0.
+        //For every 2x2 matrix with no-null elements, A*0=0, 0*A=0, being 0 a matrix with all elements 0
         return;
     }    
     
