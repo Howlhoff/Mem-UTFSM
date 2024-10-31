@@ -285,37 +285,8 @@ void multiplicar_helper(vector<tuple<idx_type,idx_type,int>>& ret, k2_tree<2>& t
         mult_squared_mat(ret,t1,t2,pos12,pos22,flag1,flag2,i,j);
     }
     else{
-        int t1c1 = (pos11 != -1) ? t1.get_child(pos11, 0) : -1;
-        int t2c1 = (pos21 != -1) ? t2.get_child(pos21, 0) : -1;
-        int t1c2 = (pos11 != -1) ? t1.get_child(pos11, 1) : -1;
-        int t2c2 = (pos21 != -1) ? t2.get_child(pos21, 1) : -1;
-        int t1c3 = (pos12 != -1) ? t1.get_child(pos12, 2) : -1;
-        int t2c3 = (pos22 != -1) ? t2.get_child(pos22, 2) : -1;
-        int t1c4 = (pos12 != -1) ? t1.get_child(pos12, 3) : -1;
-        int t2c4 = (pos22 != -1) ? t2.get_child(pos22, 3) : -1;
-
-        if (t1c1 == -1 && t2c1 == -1 && t1c2 == -1 && t2c2 == -1 && t1c3 == -1 && t2c3 == -1 && t1c4 == -1 && t2c4 == -1) {
-            return;
-        }
-
-        idx_type i1 = (i << 1);
-        idx_type j1 = (j << 1);
-        if (t1c1 != -1 || t2c1 != -1 || t1c2 != -1 || t2c3 != -1) {
-            //C11 = A11*B11 + A12*B21
-            multiplicar_helper(ret, t1, t2, t1c1, t1c2, t2c1, t2c3, flag1, flag2, i1 | 0ULL, j1 | 0ULL);
-        }
-        if (t1c2 != -1 || t2c2 != -1 || t1c2 != -1 || t2c4 != -1) {
-            //C12 = A11*B12 + A12*B22
-            multiplicar_helper(ret, t1, t2, t1c1, t1c2, t2c2, t2c4, flag1, flag2, i1 | 0ULL, j1 | 1ULL);
-        }
-        if (t1c3 != -1 || t2c1 != -1 || t1c4 != -1 || t2c3 != -1) {
-            //C21 = A21*B11 + A22*B21
-            multiplicar_helper(ret, t1, t2, t1c3, t1c4, t2c1, t2c3, flag1, flag2, i1 | 1ULL, j1 | 0ULL);
-        }
-        if (t1c4 != -1 || t2c2 != -1 || t1c4 != -1 || t2c4 != -1) {
-            //C22 = A21*B12 + A22*B22
-            multiplicar_helper(ret, t1, t2, t1c3, t1c4, t2c2, t2c4, flag1, flag2, i1 | 1ULL, j1 | 1ULL);
-        }
+        //Para cada submatriz A de 2x2, A*0=0, 0*A=0, con 0 una matriz de puros 0.
+        return;
     }    
     
 }
