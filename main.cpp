@@ -201,198 +201,154 @@ void join(vector<tuple<idx_type,idx_type,int>> &ret, vector<tuple<idx_type,idx_t
     }
 }
 
+bool all_children_empty(int c1[4], int c2[4]) {
+    for (int k = 0; k < 4; k++) {
+        if (c1[k] != -1 || c2[k] != -1) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void get_leaf_values(k2_tree<2> &t1, k2_tree<2> &t2, int c1[4], int c2[4], int val1[4], int val2[4]) {
+    for (int k = 0; k < 4; k++) {
+        val1[k] = get_leaf_value(t1, c1[k]);
+        val2[k] = get_leaf_value(t2, c2[k]);
+    }
+}
+
+void calculate_multiplications(int val1[4], int val2[4], int mul[4]) {
+    mul[0] = val1[0] * val2[0] + val1[1] * val2[2];
+    mul[1] = val1[0] * val2[1] + val1[1] * val2[3];
+    mul[2] = val1[2] * val2[0] + val1[3] * val2[2];
+    mul[3] = val1[2] * val2[1] + val1[3] * val2[3];
+}
+
+void add_results_to_ret(vector<tuple<idx_type, idx_type, int>> &ret, idx_type i1, idx_type j1, int mul[4]) {
+    tuple<idx_type, idx_type, int> r1(i1 | 0ULL, j1 | 0ULL, mul[0]);
+    tuple<idx_type, idx_type, int> r2(i1 | 0ULL, j1 | 1ULL, mul[1]);
+    tuple<idx_type, idx_type, int> r3(i1 | 1ULL, j1 | 0ULL, mul[2]);
+    tuple<idx_type, idx_type, int> r4(i1 | 1ULL, j1 | 1ULL, mul[3]);
+
+    if (mul[0] != 0) {
+        ret.push_back(r1);
+    }
+    if (mul[1] != 0) {
+        ret.push_back(r2);
+    }
+    if (mul[2] != 0) {
+        ret.push_back(r3);
+    }
+    if (mul[3] != 0) {
+        ret.push_back(r4);
+    }
+}
+
+
 // i es fila, j es columna
 
-void mult_squared_mat(vector<tuple<idx_type,idx_type,int>>& ret, k2_tree<2>& t1, k2_tree<2>& t2, int pos1, int pos2, bool flag1, bool flag2, idx_type i, idx_type j){
-    if(flag1&&flag2){
+void mult_squared_mat(vector<tuple<idx_type,idx_type,int>> &ret, k2_tree<2> &t1, k2_tree<2> &t2, int pos1, int pos2, bool flag1, bool flag2, idx_type i, idx_type j) {
+    if (flag1 && flag2) {
         int c1[4], c2[4];
-        for(int k=0; k<4; k++){
-            c1[k] = (pos1 != -1) ? t1.get_child(pos1,k) : -1;
-            c2[k] = (pos2 != -1) ? t2.get_child(pos2,k) : -1;
+        for (int k = 0; k < 4; k++) {
+            c1[k] = (pos1 != -1) ? t1.get_child(pos1, k) : -1;
+            c2[k] = (pos2 != -1) ? t2.get_child(pos2, k) : -1;
         }
         
-        bool all_empty = true;
-        for(int k=0; k<4; k++){
-            if(c1[k] != -1 || c2[k] != -1){
-                all_empty = false;
-                break;
-            }
-        }
-        if(all_empty){
+        if (all_children_empty(c1, c2)) {
             return;
         }
 
         idx_type i1 = (i << 1);
         idx_type j1 = (j << 1);
-        int val1[4],val2[4];
-        for(int k=0; k<4; k++){
-            val1[k] = get_leaf_value(t1,c1[k]);
-            val2[k] = get_leaf_value(t2,c2[k]);
-        }
+        int val1[4], val2[4];
+        get_leaf_values(t1, t2, c1, c2, val1, val2);
         int mul[4];
-        mul[0] = val1[0]*val2[0]+val1[1]*val2[2];
-        mul[1] = val1[0]*val2[1]+val1[1]*val2[3];
-        mul[2] = val1[2]*val2[0]+val1[3]*val2[2];
-        mul[3] = val1[2]*val2[1]+val1[3]*val2[3];
-        cout << "Multiplication results: mul[0]=" << mul[0] << ", mul[1]=" << mul[1]
-     << ", mul[2]=" << mul[2] << ", mul[3]=" << mul[3] << endl;
-        tuple<idx_type,idx_type,int> r1(i1|0ULL,j1|0ULL,mul[0]);
-        tuple<idx_type,idx_type,int> r2(i1|0ULL,j1|1ULL,mul[1]);
-        tuple<idx_type,idx_type,int> r3(i1|1ULL,j1|0ULL,mul[2]);
-        tuple<idx_type,idx_type,int> r4(i1|1ULL,j1|1ULL,mul[3]);
+        calculate_multiplications(val1, val2, mul);
+        add_results_to_ret(ret, i1, j1, mul);
+    }
+}
 
-        if(mul[0] != 0){
-            cout << "Adding to ret: (" << i1 << ", " << j1 << ", " << mul[0] << ")" << endl;
-            ret.push_back(r1);
-        }
-        if(mul[1] != 0){
-            cout << "Adding to ret: (" << i1 << ", " << j1 << ", " << mul[1] << ")" << endl;
-            ret.push_back(r2);
-        }
-        if(mul[2] != 0){
-            cout << "Adding to ret: (" << i1 << ", " << j1 << ", " << mul[0] << ")" << endl;
-            ret.push_back(r3);
-        }
-        if(mul[3] != 0){
-            cout << "Adding to ret: (" << i1 << ", " << j1 << ", " << mul[0] << ")" << endl;
-            ret.push_back(r4);
-        }
+bool all_children_empty(int c[4]) {
+    return all_of(c, c + 4, [](int x) { return x == -1; });
+}
+
+void process_leaf_nodes(vector<tuple<idx_type,idx_type,int>> &ret, k2_tree<2> &t1, k2_tree<2> &t2, int pos11, int pos12, int pos21, int pos22, idx_type i, idx_type j) {
+    mult_squared_mat(ret, t1, t2, pos11, pos21, true, true, i, j);
+    mult_squared_mat(ret, t1, t2, pos12, pos22, true, true, i, j);
+}
+
+void multiplicar_helper(vector<tuple<idx_type,idx_type,int>> &ret, k2_tree<2> &t1, k2_tree<2> &t2, int pos11, int pos12, int pos21, int pos22, bool flag1, bool flag2, idx_type i, idx_type j) {
+    if (pos11 == -1 || pos12 == -1 || pos21 == -1 || pos22 == -1) {
         return;
     }
-    else{
+
+    flag1 = is_leaf(pos11, t1) && is_leaf(pos12, t1);
+    flag2 = is_leaf(pos21, t2) && is_leaf(pos22, t2);
+
+    if (flag1 && flag2) {
+        process_leaf_nodes(ret, t1, t2, pos11, pos12, pos21, pos22, i, j);
+    } else {
         return;
     }
 }
 
-void multiplicar_helper(vector<tuple<idx_type,idx_type,int>>& ret, k2_tree<2>& t1, k2_tree<2>& t2, int pos11, int pos12, int pos21, int pos22, bool flag1, bool flag2, idx_type i, idx_type j){
-    if(pos11 == -1 || pos12 == -1 || pos21 == -1 || pos22 == -1){
-        return;
+void process_child_nodes(vector<tuple<idx_type, idx_type, int>> &ret, k2_tree<2> &t1, k2_tree<2> &t2, int c1[4], int c2[4], int c3[4], int c4[4], bool flag1, bool flag2, idx_type i1, idx_type j1) {
+    if (c1[0] != -1 || c2[1] != -1 || c3[0] != -1 || c4[2] != -1) {
+        multiplicar_helper(ret, t1, t2, c1[0], c2[1], c3[0], c4[2], flag1, flag2, i1 | 0ULL, j1 | 0ULL);
     }
-    if(is_leaf(pos11,t1) && is_leaf(pos12,t1)){
-        flag1 = true;
+    if (c1[0] != -1 || c2[1] != -1 || c3[1] != -1 || c4[3] != -1) {
+        multiplicar_helper(ret, t1, t2, c1[0], c2[1], c3[1], c4[3], flag1, flag2, i1 | 0ULL, j1 | 1ULL);
     }
-    else{
-        flag1 = false;
+    if (c1[2] != -1 || c2[3] != -1 || c3[0] != -1 || c4[2] != -1) {
+        multiplicar_helper(ret, t1, t2, c1[2], c2[3], c3[0], c4[2], flag1, flag2, i1 | 1ULL, j1 | 0ULL);
     }
-    if(is_leaf(pos21,t2) && is_leaf(pos22,t2)){
-        flag2 = true;
+    if (c1[2] != -1 || c2[3] != -1 || c3[1] != -1 || c4[3] != -1) {
+        multiplicar_helper(ret, t1, t2, c1[2], c2[3], c3[1], c4[3], flag1, flag2, i1 | 1ULL, j1 | 1ULL);
     }
-    else{
-        flag2 = false;
-    }
-    if(flag1 && flag2){
-        //For every 2x2 matrix with no-null elements
-        mult_squared_mat(ret,t1,t2,pos11,pos21,flag1,flag2,i,j);
-        mult_squared_mat(ret,t1,t2,pos12,pos22,flag1,flag2,i,j);
-    }
-    else{
-        //For every 2x2 matrix with no-null elements, A*0=0, 0*A=0, being 0 a matrix with all elements 0
-        return;
-    }    
-    
 }
 
-void multiplicar_test(vector<tuple<idx_type, idx_type, int>>& ret, k2_tree<2>& t1, k2_tree<2>& t2, int pos11, int pos12, int pos21, int pos22, bool flag1, bool flag2, idx_type i, idx_type j) {
+void process_non_leaf_nodes(vector<tuple<idx_type, idx_type, int>> &ret, k2_tree<2> &t1, k2_tree<2> &t2, int pos11, int pos12, int pos21, int pos22, bool flag1, bool flag2, idx_type i, idx_type j) {
+    idx_type i1 = (i << 1);
+    idx_type j1 = (j << 1);
+
+    int c1[4], c2[4], c3[4], c4[4];
+
+    for (int k = 0; k < 4; k++) {
+        c1[k] = (pos11 != -1) ? t1.get_child(pos11, k) : -1;
+        c2[k] = (pos12 != -1) ? t1.get_child(pos12, k) : -1;
+        c3[k] = (pos21 != -1) ? t2.get_child(pos21, k) : -1;
+        c4[k] = (pos22 != -1) ? t2.get_child(pos22, k) : -1;
+    }
+
+    if (all_children_empty(c1) && all_children_empty(c2) && all_children_empty(c3) && all_children_empty(c4)) {
+        return;
+    }
+
+    process_child_nodes(ret, t1, t2, c1, c2, c3, c4, flag1, flag2, i1, j1);
+}
+
+
+
+void multiplicar_test(vector<tuple<idx_type, idx_type, int>> &ret, k2_tree<2> &t1, k2_tree<2> &t2, int pos11, int pos12, int pos21, int pos22, bool flag1, bool flag2, idx_type i, idx_type j) {
     cout << "multiplicar_test called with pos11=" << pos11 << ", pos2=" << pos12 << ", i=" << i << ", j=" << j << ", flag1=" << flag1 << ", flag2=" << flag2 << endl;
-
 
     if (pos11 == -1 || pos12 == -1 || pos21 == -1 || pos22 == -1) {
         return;
     }
-    if(is_previous_leaf(pos11,t1) && is_previous_leaf(pos12,t1)){
-        flag1 = true;
-    }
-    else{
-        flag1 = false;
-    }
-    if(is_previous_leaf(pos21,t2) && is_previous_leaf(pos22,t2)){
-        flag2 = true;
-    }
-    else{
-        flag2 = false;
-    }
-    if(flag1 && flag2){
+
+    flag1 = is_previous_leaf(pos11, t1) && is_previous_leaf(pos12, t1);
+    flag2 = is_previous_leaf(pos21, t2) && is_previous_leaf(pos22, t2);
+
+    if (flag1 && flag2) {
         cout << "Calling multiplicar_helper with leaf nodes at pos11=" << pos11 << " and pos12=" << pos12 << endl;
-        multiplicar_helper(ret,t1,t2,pos11,pos12,pos21,pos22,flag1,flag2,i,j);
-    }
-    else{
-        idx_type i1 = (i << 1);
-        idx_type j1 = (j << 1);
-
-        int c1[4], c2[4], c3[4], c4[4];
-        for(int k=0; k<4; k++){
-            c1[k] = (pos11 != -1) ? t1.get_child(pos11,k) : -1;
-            c2[k] = (pos12 != -1) ? t1.get_child(pos12,k) : -1;
-            c3[k] = (pos21 != -1) ? t2.get_child(pos21,k) : -1;
-            c4[k] = (pos22 != -1) ? t2.get_child(pos22,k) : -1;
-        }
-
-        if(all_of(begin(c1),end(c1),[](int x){return x==-1;})&&
-        all_of(begin(c2),end(c2),[](int x){return x==-1;})&&
-        all_of(begin(c3),end(c3),[](int x){return x==-1;})&&
-        all_of(begin(c4),end(c4),[](int x){return x==-1;})){
-            return;
-        }
-        else{
-            if(c1[0] != -1 || c2[1] != -1 || c3[0] != -1 || c4[2] != -1){
-                multiplicar_test(ret,t1,t2,c1[0],c2[1],c3[0],c4[2],flag1,flag2,i1|0ULL,j1|0ULL);
-            }
-            if(c1[0] != -1 || c2[1] != -1 || c3[1] != -1 || c4[3] != -1){
-                multiplicar_test(ret,t1,t2,c1[0],c2[1],c3[1],c4[3],flag1,flag2,i1|0ULL,j1|1ULL);
-            }
-            if(c1[2] != -1 || c2[3] != -1 || c3[0] != -1 || c4[2] != -1){
-                multiplicar_test(ret,t1,t2,c1[2],c2[3],c3[0],c4[2],flag1,flag2,i1|1ULL,j1|0ULL);
-            }
-            if(c1[2] != -1 || c2[3] != -1 || c3[1] != -1 || c4[3] != -1){
-                multiplicar_test(ret,t1,t2,c1[2],c2[3],c3[1],c4[3],flag1,flag2,i1|1ULL,j1|1ULL);
-            }
-        }
-
-    }
-    
-}
-
-void multiplicar(vector<tuple<idx_type,idx_type,int>> &ret, k2_tree<2>& t1, k2_tree<2>& t2, int pos1, int pos2, bool flag1, bool flag2) {
-    vector<tuple<idx_type,idx_type,int>> c1, c2, c3, c4, c5, c6, c7, c8, ret1, ret2, ret3, ret4;
-    if (pos1 == -1 || pos2 == -1) {
-        return;
-    }
-    if (is_leaf(pos1, t1) && is_leaf(pos2, t2)) {
-        idx_type i1 = t1.get_k_l_rank(pos1 - t1.get_t().size());
-        idx_type i2 = t2.get_k_l_rank(pos2 - t2.get_t().size());
-        position k1, k2;
-        k1 = get_reversed_z_order(i1);
-        k2 = get_reversed_z_order(i2);
-        if (k1.i == k2.j) {
-            int add = t1.get_v(i1) * t2.get_v(i2);
-            tuple<idx_type,idx_type,int> r(k1.i, k2.j, add);
-            ret.push_back(r);
-        }
+        multiplicar_helper(ret, t1, t2, pos11, pos12, pos21, pos22, flag1, flag2, i, j);
     } else {
-        multiplicar(c1, t1, t2, t1.get_child(pos1, 0), t2.get_child(pos2, 0), flag1, flag2);
-        multiplicar(c2, t1, t2, t1.get_child(pos1, 1), t2.get_child(pos2, 2), flag1, flag2);
-        multiplicar(c3, t1, t2, t1.get_child(pos1, 0), t2.get_child(pos2, 1), flag1, flag2);
-        multiplicar(c4, t1, t2, t1.get_child(pos1, 1), t2.get_child(pos2, 3), flag1, flag2);
-        multiplicar(c5, t1, t2, t1.get_child(pos1, 2), t2.get_child(pos2, 0), flag1, flag2);
-        multiplicar(c6, t1, t2, t1.get_child(pos1, 3), t2.get_child(pos2, 2), flag1, flag2);
-        multiplicar(c7, t1, t2, t1.get_child(pos1, 2), t2.get_child(pos2, 1), flag1, flag2);
-        multiplicar(c8, t1, t2, t1.get_child(pos1, 3), t2.get_child(pos2, 3), flag1, flag2);
-        k2_tree<2> t3(c1, c1.size());
-        k2_tree<2> t4(c2, c2.size());
-        k2_tree<2> t5(c3, c3.size());
-        k2_tree<2> t6(c4, c4.size());
-        k2_tree<2> t7(c5, c5.size());
-        k2_tree<2> t8(c6, c6.size());
-        k2_tree<2> t9(c7, c7.size());
-        k2_tree<2> t10(c8, c8.size());
-        idx_type i = 0, j = 0;
-        suma(ret1, t3, t4, 0, 0, false, false, i, j);
-        suma(ret2, t5, t6, 0, 0, false, false, i, j);
-        suma(ret3, t7, t8, 0, 0, false, false, i, j);
-        suma(ret4, t9, t10, 0, 0, false, false, i, j);
-        join(ret, ret1, ret2, ret3, ret4);
+        process_non_leaf_nodes(ret, t1, t2, pos11, pos12, pos21, pos22, flag1, flag2, i, j);
     }
 }
+
+
 
 void delete_zeros(vector<tuple<idx_type,idx_type,int>> &ret){
     for(int i=0; i<ret.size(); i++){
@@ -418,7 +374,8 @@ k2_tree<2> sumaImpl(k2_tree<2>& t1, k2_tree<2>& t2){
 k2_tree<2> multiplicarImpl(k2_tree<2>& t1, k2_tree<2>& t2){
     vector<tuple<idx_type,idx_type,int>> ret;
     k0 = clock();
-    multiplicar(ret,t1,t2,0,0,false,false);
+    idx_type i = 0, j = 0;
+    multiplicar_test(ret,t1,t2,0,0,0,0,false,false,i,j);
     k2_tree<2> t3(ret,ret.size());
     k1 = clock();
     cout << "time: " << (double(k1-k0)/CLOCKS_PER_SEC) << endl;
