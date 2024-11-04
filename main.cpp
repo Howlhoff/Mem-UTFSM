@@ -11,6 +11,7 @@ typedef uint64_t idx_type;
 
 bool is_leaf(int actual, k2_tree<2>& t){
     int leaf_index = actual-t.get_t().size();
+    cout << "Leaf index: " << leaf_index << endl;
     if(leaf_index < t.get_l().size()){
         return true;
     }
@@ -201,6 +202,99 @@ void join(vector<tuple<idx_type,idx_type,int>> &ret, vector<tuple<idx_type,idx_t
     }
     for(int i=0; i<ret4.size(); i++){
         ret.push_back(ret4[i]);
+    }
+}
+
+//multiplicacion de matrices usando divide y venceras
+
+void mult_new_test(vector<tuple<idx_type, idx_type, int>> &ret, k2_tree<2> &t1, k2_tree<2> &t2, idx_type pos1, idx_type pos2, bool flag1, bool flag2, idx_type i, idx_type j) {
+    cout << "pos1: " << pos1 << " pos2: " << pos2 << endl;
+    if (pos1 == -1 && pos2 == -1) {
+        return;
+    }
+    if (is_leaf(pos1, t1)) {
+        flag1 = true;
+    } else {
+        flag1 = false;
+    }
+    if (is_leaf(pos2, t2)) {
+        flag2 = true;
+    } else {
+        flag2 = false;
+    }
+    if (flag1 && flag2) {
+        // uint64_t
+        cout << "Leaf nodes" << endl;
+        auto index1 = pos1 - t1.get_t().size();
+        auto index2 = pos2 - t2.get_t().size();
+        cout << "index1: " << index1 << " index2: " << index2 << endl;
+        if (t1.get_l()[index1] == 1 && t2.get_l()[index2] == 1) {
+            idx_type d1 = t1.get_k_l_rank(index1), d2 = t2.get_k_l_rank(index2);
+            auto add = t1.get_v(d1) * t2.get_v(d2);
+            tuple<idx_type, idx_type, int> r(i, j, add);
+            ret.push_back(r);
+        } else {
+            return;
+        }
+    } else {
+        int t1c1 = (pos1 != -1) ? t1.get_child(pos1, 0) : -1; //A1
+        int t2c1 = (pos2 != -1) ? t2.get_child(pos2, 0) : -1; //B1
+        int t1c2 = (pos1 != -1) ? t1.get_child(pos1, 1) : -1; //A2
+        int t2c2 = (pos2 != -1) ? t2.get_child(pos2, 1) : -1; //B2
+        int t1c3 = (pos1 != -1) ? t1.get_child(pos1, 2) : -1; //A3
+        int t2c3 = (pos2 != -1) ? t2.get_child(pos2, 2) : -1; //B3
+        int t1c4 = (pos1 != -1) ? t1.get_child(pos1, 3) : -1; //A4
+        int t2c4 = (pos2 != -1) ? t2.get_child(pos2, 3) : -1; //B4
+
+        cout << "Children: t1c1=" << t1c1 << ", t2c1=" << t2c1 << ", t1c2=" << t1c2 << ", t2c2=" << t2c2 << ", t1c3=" << t1c3 << ", t2c3=" << t2c3 << ", t1c4=" << t1c4 << ", t2c4=" << t2c4 << endl;
+
+        if (t1c1 == -1 && t2c1 == -1 && t1c2 == -1 && t2c2 == -1 && t1c3 == -1 && t2c3 == -1 && t1c4 == -1 && t2c4 == -1) {
+            return;
+        }
+
+        idx_type i1 = (i << 1);
+        idx_type j1 = (j << 1);
+        vector<tuple<idx_type, idx_type, int>> ret1;
+        vector<tuple<idx_type, idx_type, int>> ret2;
+        vector<tuple<idx_type, idx_type, int>> ret3;
+        vector<tuple<idx_type, idx_type, int>> ret4;
+        vector<tuple<idx_type, idx_type, int>> ret5;
+        vector<tuple<idx_type, idx_type, int>> ret6;
+        vector<tuple<idx_type, idx_type, int>> ret7;
+        vector<tuple<idx_type, idx_type, int>> ret8;
+        //C1 = A1*B1 + A2*B3
+        //C2 = A1*B2 + A2*B4
+        //C3 = A3*B1 + A4*B3
+        //C4 = A3*B2 + A4*B4
+        if (t1c1 != -1 || t2c1 != -1) {
+            mult_new_test(ret1, t1, t2, t1c1, t2c1, flag1, flag2, i1 | 0ULL, j1 | 0ULL);
+        }
+        if (t1c2 != -1 || t2c3 != -1) {
+            mult_new_test(ret2, t1, t2, t1c2, t2c3, flag1, flag2, i1 | 0ULL, j1 | 1ULL);
+        }
+        //sumar ret1 y ret 2
+        if (t1c1 != -1 || t2c2 != -1) {
+            mult_new_test(ret3, t1, t2, t1c1, t2c2, flag1, flag2, i1 | 1ULL, j1 | 0ULL);
+        }
+        if (t1c2 != -1 || t2c4 != -1) {
+            mult_new_test(ret4, t1, t2, t1c2, t2c4, flag1, flag2, i1 | 1ULL, j1 | 1ULL);
+        }
+        //sumar ret3 y ret4
+        if(t1c3 != -1 || t2c1 != -1){
+            mult_new_test(ret5, t1, t2, t1c3, t2c1, flag1, flag2, i1 | 0ULL, j1 | 0ULL);
+        }
+        if(t1c4 != -1 || t2c3 != -1){
+            mult_new_test(ret6, t1, t2, t1c4, t2c3, flag1, flag2, i1 | 0ULL, j1 | 1ULL);
+        }
+        //sumar ret5 y ret6
+        if(t1c3 != -1 || t2c2 != -1){
+            mult_new_test(ret7, t1, t2, t1c3, t2c2, flag1, flag2, i1 | 1ULL, j1 | 0ULL);
+        }
+        if(t1c4 != -1 || t2c4 != -1){
+            mult_new_test(ret8, t1, t2, t1c4, t2c4, flag1, flag2, i1 | 1ULL, j1 | 1ULL);
+        }
+        //sumar ret7 y ret8
+        join(ret, ret1, ret2, ret3, ret4);
     }
 }
 
@@ -504,7 +598,7 @@ int main(){
     idx_type i = 0, j = 0;
 
     //suma(ret,arbol1,arbol2,0,0,false,false,i,j);
-    multiplicar_test(ret,arbol1,arbol2,0,0,0,0,false,false,i,j);
+    mult_new_test(ret,arbol1,arbol2,0,0,false,false,i,j);
     k2_tree<2> arbol3(ret,ret.size());
 
     print_bit_vector(arbol3.get_t());
