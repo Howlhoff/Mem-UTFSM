@@ -605,10 +605,6 @@ class k2_tree
         }
 
         idx_type get_child(idx_type a, idx_type i) {
-            std::cout << "get_child called with a=" << a << ", i=" << i << std::endl;
-
-            std::cout << "actual=" << a << std::endl;
-
             // Comprobar que actual está dentro del rango de los bit vectors
             if (a < 0 || i < 0 || a >= k_t.size() + k_l.size()) {
                 std::cout << "Error: Índices fuera de rango" << std::endl;
@@ -625,7 +621,6 @@ class k2_tree
                 if (k_t[a] == 1) {
                     // Calcular el hijo utilizando `rank`
                     idx_type rank_val = k_t_rank(a+1);
-                    std::cout << "rank_val=" << rank_val << std::endl;
                     if (rank_val * k_k * k_k + i >= k_t.size() + k_l.size()) {
                         std::cout << "Error: Rank calculado fuera de rango" << std::endl;
                         return -1;  // Evitar acceder fuera de los límites
@@ -637,7 +632,6 @@ class k2_tree
             }
 
             int leaf_index = a - k_t.size();
-            std::cout << "leaf_index=" << leaf_index << std::endl;
             if (leaf_index < k_l.size() ) {
                 // El valor en `k_l` es 1, retornar el índice `i`
                 return i;
