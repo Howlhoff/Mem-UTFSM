@@ -11,7 +11,7 @@ typedef uint64_t idx_type;
 
 bool is_leaf(int actual, k2_tree<2>& t){
     int leaf_index = actual-t.get_t().size();
-    cout << "Leaf index: " << leaf_index << endl;
+    cout << "Leaf bool: " << (leaf_index < t.get_l().size()) << endl;
     if(leaf_index < t.get_l().size()){
         return true;
     }
@@ -233,9 +233,14 @@ void mult_new_test(vector<tuple<idx_type, idx_type, int>> &ret, k2_tree<2> &t1, 
             auto add = t1.get_v(d1) * t2.get_v(d2);
             tuple<idx_type, idx_type, int> r(i, j, add);
             ret.push_back(r);
-        } else {
-            return;
         }
+        return;
+    }
+    else if(flag1 && !flag2){
+        return;
+    }
+    else if(!flag1 && flag2){
+        return;
     } else {
         int t1c1 = (pos1 != -1) ? t1.get_child(pos1, 0) : -1; //A1
         int t2c1 = (pos2 != -1) ? t2.get_child(pos2, 0) : -1; //B1
@@ -263,38 +268,45 @@ void mult_new_test(vector<tuple<idx_type, idx_type, int>> &ret, k2_tree<2> &t1, 
         vector<tuple<idx_type, idx_type, int>> ret7;
         vector<tuple<idx_type, idx_type, int>> ret8;
         //C1 = A1*B1 + A2*B3
-        //C2 = A1*B2 + A2*B4
-        //C3 = A3*B1 + A4*B3
-        //C4 = A3*B2 + A4*B4
         if (t1c1 != -1 || t2c1 != -1) {
-            mult_new_test(ret1, t1, t2, t1c1, t2c1, flag1, flag2, i1 | 0ULL, j1 | 0ULL);
+            mult_new_test(ret1, t1, t2, t1c1, t2c1, flag1, flag2, i1, j1);
         }
         if (t1c2 != -1 || t2c3 != -1) {
-            mult_new_test(ret2, t1, t2, t1c2, t2c3, flag1, flag2, i1 | 0ULL, j1 | 1ULL);
+            mult_new_test(ret2, t1, t2, t1c2, t2c3, flag1, flag2, i1, j1);
         }
         //sumar ret1 y ret 2
+        k2_tree<2> t3(ret1, ret1.size()), t4(ret2, ret2.size());
+        suma(ret, t3, t4, 0, 0, flag1, flag2, i1 | 0ULL, j1 | 0ULL);
+        //C2 = A1*B2 + A2*B4
         if (t1c1 != -1 || t2c2 != -1) {
-            mult_new_test(ret3, t1, t2, t1c1, t2c2, flag1, flag2, i1 | 1ULL, j1 | 0ULL);
+            mult_new_test(ret3, t1, t2, t1c1, t2c2, flag1, flag2, i1, j1);
         }
         if (t1c2 != -1 || t2c4 != -1) {
-            mult_new_test(ret4, t1, t2, t1c2, t2c4, flag1, flag2, i1 | 1ULL, j1 | 1ULL);
+            mult_new_test(ret4, t1, t2, t1c2, t2c4, flag1, flag2, i1, j1);
         }
         //sumar ret3 y ret4
+        k2_tree<2> t5(ret3, ret3.size()), t6(ret4, ret4.size());
+        suma(ret, t5, t6, 0, 0, flag1, flag2, i1 | 0ULL, j1 | 1ULL);
+        //C3 = A3*B1 + A4*B3
         if(t1c3 != -1 || t2c1 != -1){
-            mult_new_test(ret5, t1, t2, t1c3, t2c1, flag1, flag2, i1 | 0ULL, j1 | 0ULL);
+            mult_new_test(ret5, t1, t2, t1c3, t2c1, flag1, flag2, i1, j1);
         }
         if(t1c4 != -1 || t2c3 != -1){
-            mult_new_test(ret6, t1, t2, t1c4, t2c3, flag1, flag2, i1 | 0ULL, j1 | 1ULL);
+            mult_new_test(ret6, t1, t2, t1c4, t2c3, flag1, flag2, i1, j1);
         }
         //sumar ret5 y ret6
+        k2_tree<2> t7(ret5, ret5.size()), t8(ret6, ret6.size());
+        suma(ret, t7, t8, 0, 0, flag1, flag2, i1 | 1ULL, j1 | 0ULL);
+        //C4 = A3*B2 + A4*B4
         if(t1c3 != -1 || t2c2 != -1){
-            mult_new_test(ret7, t1, t2, t1c3, t2c2, flag1, flag2, i1 | 1ULL, j1 | 0ULL);
+            mult_new_test(ret7, t1, t2, t1c3, t2c2, flag1, flag2, i1, j1);
         }
         if(t1c4 != -1 || t2c4 != -1){
-            mult_new_test(ret8, t1, t2, t1c4, t2c4, flag1, flag2, i1 | 1ULL, j1 | 1ULL);
+            mult_new_test(ret8, t1, t2, t1c4, t2c4, flag1, flag2, i1, j1);
         }
         //sumar ret7 y ret8
-        join(ret, ret1, ret2, ret3, ret4);
+        k2_tree<2> t9(ret7, ret7.size()), t10(ret8, ret8.size());
+        suma(ret, t9, t10, 0, 0, flag1, flag2, i1 | 1ULL, j1 | 1ULL);
     }
 }
 
