@@ -11,7 +11,6 @@ typedef uint64_t idx_type;
 
 bool is_leaf(int actual, k2_tree<2>& t){
     int leaf_index = actual-t.get_t().size();
-    cout << "Leaf bool: " << (leaf_index < t.get_l().size()) << endl;
     if(leaf_index < t.get_l().size()){
         return true;
     }
@@ -159,14 +158,14 @@ void suma(vector<tuple<idx_type, idx_type, int>>& ret, k2_tree<2>& t1, k2_tree<2
         //ret.push_back(r);
     } else {
         // Suma de los elementos de los nodos
-        int t1c1 = (pos1 != -1) ? t1.get_child(pos1, 0) : -1;
-        int t2c1 = (pos2 != -1) ? t2.get_child(pos2, 0) : -1;
-        int t1c2 = (pos1 != -1) ? t1.get_child(pos1, 1) : -1;
-        int t2c2 = (pos2 != -1) ? t2.get_child(pos2, 1) : -1;
-        int t1c3 = (pos1 != -1) ? t1.get_child(pos1, 2) : -1;
-        int t2c3 = (pos2 != -1) ? t2.get_child(pos2, 2) : -1;
-        int t1c4 = (pos1 != -1) ? t1.get_child(pos1, 3) : -1;
-        int t2c4 = (pos2 != -1) ? t2.get_child(pos2, 3) : -1;
+        int t1c1 = (pos1 != -1) ? t1.get_child(pos1, 0) : -1; //A1
+        int t2c1 = (pos2 != -1) ? t2.get_child(pos2, 0) : -1; //B1
+        int t1c2 = (pos1 != -1) ? t1.get_child(pos1, 1) : -1; //A2
+        int t2c2 = (pos2 != -1) ? t2.get_child(pos2, 1) : -1; //B2
+        int t1c3 = (pos1 != -1) ? t1.get_child(pos1, 2) : -1; //A3
+        int t2c3 = (pos2 != -1) ? t2.get_child(pos2, 2) : -1; //B3
+        int t1c4 = (pos1 != -1) ? t1.get_child(pos1, 3) : -1; //A4
+        int t2c4 = (pos2 != -1) ? t2.get_child(pos2, 3) : -1; //B4
 
         if (t1c1 == -1 && t2c1 == -1 && t1c2 == -1 && t2c2 == -1 && t1c3 == -1 && t2c3 == -1 && t1c4 == -1 && t2c4 == -1) {
             return;
@@ -205,43 +204,84 @@ void join(vector<tuple<idx_type,idx_type,int>> &ret, vector<tuple<idx_type,idx_t
     }
 }
 
+void print_vector_tuple(vector<tuple<idx_type,idx_type,int>> v){
+    for(int i=0; i<v.size(); i++){
+        cout << get<0>(v[i]) << " " << get<1>(v[i]) << " " << get<2>(v[i]) << endl;
+    }
+}
+
+void print_bit_vector(const bit_vector &bv) {
+    for (const auto &bit : bv) {
+        std::cout << bit;
+    }
+    std::cout << std::endl;
+}
+
 //multiplicacion de matrices usando divide y venceras
 
-void mult_new_test(vector<tuple<idx_type, idx_type, int>> &ret, k2_tree<2> &t1, k2_tree<2> &t2, idx_type pos1, idx_type pos2, bool flag1, bool flag2, idx_type i, idx_type j) {
+/**
+ * Multiplies two k2_trees and stores the result in a vector of tuples.
+ * 
+ * @param ret The vector to store the result tuples.
+ * @param t1 The first k2_tree.
+ * @param t2 The second k2_tree.
+ * @param pos1 The current position in the first k2_tree.
+ * @param pos2 The current position in the second k2_tree.
+ * @param flag1 Indicates if the current node in the first k2_tree is a leaf.
+ * @param flag2 Indicates if the current node in the second k2_tree is a leaf.
+ * @param i The current row index in the result matrix.
+ * @param j The current column index in the result matrix.
+ */
+void mult_new_test(vector<tuple<idx_type, idx_type, int>>& ret, k2_tree<2>& t1, k2_tree<2>& t2, idx_type pos1, idx_type pos2, bool flag1, bool flag2, idx_type i, idx_type j) {
     cout << "pos1: " << pos1 << " pos2: " << pos2 << endl;
     if (pos1 == -1 && pos2 == -1) {
         return;
     }
-    if (is_leaf(pos1, t1)) {
-        flag1 = true;
-    } else {
-        flag1 = false;
-    }
-    if (is_leaf(pos2, t2)) {
-        flag2 = true;
-    } else {
-        flag2 = false;
-    }
+    print_vector_tuple(ret);
+    flag1 = is_leaf(pos1, t1);
+    flag2 = is_leaf(pos2, t2);
     if (flag1 && flag2) {
         // uint64_t
-        cout << "Leaf nodes" << endl;
+        cout << "c0" << endl;
         auto index1 = pos1 - t1.get_t().size();
         auto index2 = pos2 - t2.get_t().size();
         cout << "index1: " << index1 << " index2: " << index2 << endl;
-        if (t1.get_l()[index1] == 1 && t2.get_l()[index2] == 1) {
-            idx_type d1 = t1.get_k_l_rank(index1), d2 = t2.get_k_l_rank(index2);
-            auto add = t1.get_v(d1) * t2.get_v(d2);
-            tuple<idx_type, idx_type, int> r(i, j, add);
-            ret.push_back(r);
+        bool k1 = index1 >= 0 && index1 < t1.get_l().size();
+        bool k2 = index2 >= 0 && index2 < t2.get_l().size();
+        cout << "k1: " << k1 << " k2: " << k2 << endl;
+        if(k1 && k2){
+            cout << "p1" << endl;
+            bool u1 = t1.get_l()[index1] == 1;
+            bool u2 = t2.get_l()[index2] == 1;
+            cout << "u1: " << u1 << " u2: " << u2 << endl;
+            if (u1 && u2) {
+                idx_type d1 = t1.get_k_l_rank(index1), d2 = t2.get_k_l_rank(index2);
+                cout << "v1 = " << t1.get_v(d1) << " v2 = " << t2.get_v(d2) << endl;
+                auto add = t1.get_v(d1) * t2.get_v(d2);
+                cout << "add: " << add << endl;
+                cout << "p2" << endl;
+                tuple<idx_type, idx_type, int> r(i, j, add);
+                ret.push_back(r);
+            }
+            else{
+                return;
+            }
         }
-        return;
+        else{
+            return;
+        }
     }
+    //C = A*0 = 0
     else if(flag1 && !flag2){
+        cout << "c1" << endl;
         return;
     }
+    //C = 0*A = 0
     else if(!flag1 && flag2){
+        cout << "c2" << endl;
         return;
     } else {
+        cout << "a" << endl;
         int t1c1 = (pos1 != -1) ? t1.get_child(pos1, 0) : -1; //A1
         int t2c1 = (pos2 != -1) ? t2.get_child(pos2, 0) : -1; //B1
         int t1c2 = (pos1 != -1) ? t1.get_child(pos1, 1) : -1; //A2
@@ -268,47 +308,132 @@ void mult_new_test(vector<tuple<idx_type, idx_type, int>> &ret, k2_tree<2> &t1, 
         vector<tuple<idx_type, idx_type, int>> ret7;
         vector<tuple<idx_type, idx_type, int>> ret8;
         //C1 = A1*B1 + A2*B3
-        if (t1c1 != -1 || t2c1 != -1) {
-            mult_new_test(ret1, t1, t2, t1c1, t2c1, flag1, flag2, i1, j1);
-        }
-        if (t1c2 != -1 || t2c3 != -1) {
-            mult_new_test(ret2, t1, t2, t1c2, t2c3, flag1, flag2, i1, j1);
+        if (t1c1 != -1 || t2c1 != -1 || t1c2 != -1 || t2c3 != -1) {
+            mult_new_test(ret1, t1, t2, t1c1, t2c1, flag1, flag2, i1 | 0ULL, j1 | 0ULL);
+            mult_new_test(ret2, t1, t2, t1c2, t2c3, flag1, flag2, i1 | 0ULL, j1 | 0ULL);        
+            print_vector_tuple(ret1);
+            print_vector_tuple(ret2);
+            k2_tree<2> z1(ret1, ret1.size()), z2(ret2, ret2.size());
+            suma(ret, z1, z2, 0, 0, false, false, 0, 0);
+            cout << "b1" << endl;
         }
         //sumar ret1 y ret 2
-        k2_tree<2> t3(ret1, ret1.size()), t4(ret2, ret2.size());
-        suma(ret, t3, t4, 0, 0, flag1, flag2, i1 | 0ULL, j1 | 0ULL);
         //C2 = A1*B2 + A2*B4
-        if (t1c1 != -1 || t2c2 != -1) {
-            mult_new_test(ret3, t1, t2, t1c1, t2c2, flag1, flag2, i1, j1);
-        }
-        if (t1c2 != -1 || t2c4 != -1) {
-            mult_new_test(ret4, t1, t2, t1c2, t2c4, flag1, flag2, i1, j1);
+        if (t1c1 != -1 || t2c2 != -1 || t1c2 != -1 || t2c4 != -1) {
+            mult_new_test(ret3, t1, t2, t1c1, t2c2, flag1, flag2, i1 | 0ULL, j1 | 1ULL);
+            mult_new_test(ret4, t1, t2, t1c2, t2c4, flag1, flag2, i1 | 0ULL, j1 | 1ULL);    
+            print_vector_tuple(ret3);
+            print_vector_tuple(ret4);
+            k2_tree<2> z1(ret3, ret3.size()), z2(ret4, ret4.size());
+            suma(ret, z1, z2, 0, 0, false, false, 0, 0);
+            cout << "b2" << endl;
         }
         //sumar ret3 y ret4
-        k2_tree<2> t5(ret3, ret3.size()), t6(ret4, ret4.size());
-        suma(ret, t5, t6, 0, 0, flag1, flag2, i1 | 0ULL, j1 | 1ULL);
         //C3 = A3*B1 + A4*B3
-        if(t1c3 != -1 || t2c1 != -1){
-            mult_new_test(ret5, t1, t2, t1c3, t2c1, flag1, flag2, i1, j1);
-        }
-        if(t1c4 != -1 || t2c3 != -1){
-            mult_new_test(ret6, t1, t2, t1c4, t2c3, flag1, flag2, i1, j1);
+        if(t1c3 != -1 || t2c1 != -1 || t1c4 != -1 || t2c3 != -1){
+            mult_new_test(ret5, t1, t2, t1c3, t2c1, flag1, flag2, i1 | 1ULL, j1 | 0ULL);
+            mult_new_test(ret6, t1, t2, t1c4, t2c3, flag1, flag2, i1 | 1ULL, j1 | 0ULL);
+            print_vector_tuple(ret5);
+            print_vector_tuple(ret6);
+            k2_tree<2> z1(ret5, ret5.size()), z2(ret6, ret6.size());
+            suma(ret, z1, z2, 0, 0, false, false, 0, 0);
+            cout << "b3" << endl;
         }
         //sumar ret5 y ret6
-        k2_tree<2> t7(ret5, ret5.size()), t8(ret6, ret6.size());
-        suma(ret, t7, t8, 0, 0, flag1, flag2, i1 | 1ULL, j1 | 0ULL);
         //C4 = A3*B2 + A4*B4
-        if(t1c3 != -1 || t2c2 != -1){
-            mult_new_test(ret7, t1, t2, t1c3, t2c2, flag1, flag2, i1, j1);
-        }
-        if(t1c4 != -1 || t2c4 != -1){
-            mult_new_test(ret8, t1, t2, t1c4, t2c4, flag1, flag2, i1, j1);
+        if(t1c3 != -1 || t2c2 != -1 || t1c4 != -1 || t2c4 != -1){
+            mult_new_test(ret7, t1, t2, t1c3, t2c2, flag1, flag2, i1 | 1ULL, j1 | 1ULL);
+            mult_new_test(ret8, t1, t2, t1c4, t2c4, flag1, flag2, i1 | 1ULL, j1 | 1ULL);
+            print_vector_tuple(ret7);
+            print_vector_tuple(ret8);
+            k2_tree<2> z1(ret7, ret7.size()), z2(ret8, ret8.size());
+            suma(ret, z1, z2, 0, 0, false, false, 0, 0);
+            cout << "b4" << endl;
         }
         //sumar ret7 y ret8
-        k2_tree<2> t9(ret7, ret7.size()), t10(ret8, ret8.size());
-        suma(ret, t9, t10, 0, 0, flag1, flag2, i1 | 1ULL, j1 | 1ULL);
     }
 }
+
+void test_mult_test(vector<tuple<idx_type, idx_type, int>>& ret, k2_tree<2>& t1, k2_tree<2>& t2, idx_type pos1, idx_type pos2, bool flag1, bool flag2, idx_type i, idx_type j){
+        cout << "pos1: " << pos1 << " pos2: " << pos2 << endl;
+
+    if (pos1 == -1 && pos2 == -1) {
+        return;
+    }
+    print_vector_tuple(ret);
+
+    flag1 = is_leaf(pos1, t1);
+    flag2 = is_leaf(pos2, t2);
+
+    if (flag1 && flag2) {
+        cout << "c0" << endl;
+        auto index1 = pos1 - t1.get_t().size();
+        auto index2 = pos2 - t2.get_t().size();
+        cout << "index1: " << index1 << " index2: " << index2 << endl;
+
+        if (index1 >= 0 && index1 < t1.get_l().size() && index2 >= 0 && index2 < t2.get_l().size()) {
+            bool u1 = t1.get_l()[index1] == 1;
+            bool u2 = t2.get_l()[index2] == 1;
+            cout << "u1: " << u1 << " u2: " << u2 << endl;
+
+            if (u1 && u2) {
+                idx_type d1 = t1.get_k_l_rank(index1), d2 = t2.get_k_l_rank(index2);
+                int add = t1.get_v(d1) * t2.get_v(d2);
+                ret.emplace_back(i, j, add);
+            }
+        }
+        return;
+    }
+    
+    if (flag1 || flag2) {
+        cout << (flag1 ? "c1" : "c2") << endl;
+        return;
+    }
+
+    cout << "a" << endl;
+
+    // Obtener hijos y verificar su validez.
+    idx_type children1[4] = { t1.get_child(pos1, 0), t1.get_child(pos1, 1), t1.get_child(pos1, 2), t1.get_child(pos1, 3) };
+    idx_type children2[4] = { t2.get_child(pos2, 0), t2.get_child(pos2, 1), t2.get_child(pos2, 2), t2.get_child(pos2, 3) };
+    
+    idx_type i1 = (i << 1);
+    idx_type j1 = (j << 1);
+
+    // Calcula las submatrices
+    vector<vector<tuple<idx_type, idx_type, int>>> sub_results(8);
+    auto add_and_sum = [&](int idx, int c1, int c2, int i_offset, int j_offset) {
+        if (c1 != -1 || c2 != -1) {
+            test_mult_test(sub_results[idx], t1, t2, c1, c2, flag1, flag2, i1 | i_offset, j1 | j_offset);
+            print_vector_tuple(sub_results[idx]);
+        }
+    };
+
+    // C1 = A1*B1 + A2*B3
+    add_and_sum(0, children1[0], children2[0], 0ULL, 0ULL);
+    add_and_sum(1, children1[1], children2[2], 0ULL, 0ULL);
+    k2_tree<2> z1(sub_results[0], sub_results[0].size()), z2(sub_results[1], sub_results[1].size());
+    suma(ret, z1, z2, 0, 0, false, false, 0, 0);
+
+    // C2 = A1*B2 + A2*B4
+    add_and_sum(2, children1[0], children2[1], 0ULL, 1ULL);
+    add_and_sum(3, children1[1], children2[3], 0ULL, 1ULL);
+    k2_tree<2> z3(sub_results[2], sub_results[2].size()), z4(sub_results[3], sub_results[3].size());
+    suma(ret, z3, z4, 0, 0, false, false, 0, 0);
+
+    // C3 = A3*B1 + A4*B3
+    add_and_sum(4, children1[2], children2[0], 1ULL, 0ULL);
+    add_and_sum(5, children1[3], children2[2], 1ULL, 0ULL);
+    k2_tree<2> z5(sub_results[4], sub_results[4].size()), z6(sub_results[5], sub_results[5].size());
+    suma(ret, z5, z6, 0, 0, false, false, 0, 0);
+
+    // C4 = A3*B2 + A4*B4
+    add_and_sum(6, children1[2], children2[1], 1ULL, 1ULL);
+    add_and_sum(7, children1[3], children2[3], 1ULL, 1ULL);
+    k2_tree<2> temp_z1(sub_results[6], sub_results[6].size());
+    k2_tree<2> temp_z2(sub_results[7], sub_results[7].size());
+    suma(ret, temp_z1, temp_z2, 0, 0, false, false, 0, 0);
+}
+
 
 void print_array(int a[], int n) {
     for (int i = 0; i < n; i++) {
@@ -318,11 +443,7 @@ void print_array(int a[], int n) {
 }
 
 
-void print_vector_tuple(vector<tuple<idx_type,idx_type,int>> v){
-    for(int i=0; i<v.size(); i++){
-        cout << get<0>(v[i]) << " " << get<1>(v[i]) << " " << get<2>(v[i]) << endl;
-    }
-}
+
 
 bool all_children_empty(int c1[], int c2[], int n) {
     for (int k = 0; k < n; k++) {
@@ -553,12 +674,7 @@ k2_tree<2> multiplicarImpl(k2_tree<2>& t1, k2_tree<2>& t2){
 
 double _time = (double(k1-k0)/CLOCKS_PER_SEC);
 
-void print_bit_vector(const bit_vector &bv) {
-    for (const auto &bit : bv) {
-        std::cout << bit;
-    }
-    std::cout << std::endl;
-}
+
 
 void print_from_list_to_matrix(vector<tuple<idx_type,idx_type,int>> m){
     //print a matrix from a list of tuples
@@ -610,17 +726,17 @@ int main(){
     idx_type i = 0, j = 0;
 
     //suma(ret,arbol1,arbol2,0,0,false,false,i,j);
-    mult_new_test(ret,arbol1,arbol2,0,0,false,false,i,j);
+    test_mult_test(ret,arbol1,arbol2,0,0,false,false,i,j);
     k2_tree<2> arbol3(ret,ret.size());
 
     print_bit_vector(arbol3.get_t());
     print_bit_vector(arbol3.get_l());
 
     //print ret
-    cout << "m1" << endl;
-    print_from_list_to_matrix(m1);
-    cout << "m2" << endl;
-    print_from_list_to_matrix(m2);
+    //cout << "m1" << endl;
+    //print_from_list_to_matrix(m1);
+    //cout << "m2" << endl;
+    //print_from_list_to_matrix(m2);
     cout << "ret" << endl;
     print_from_list_to_matrix(ret);
     cout << "ret values" << endl;
