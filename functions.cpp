@@ -41,6 +41,51 @@ vector<vector<int>> submatrix(vector<vector<int>> m, int i, int j, int n){
     return m2;
 }
 
+void sumatest(vector<tuple<idx_type,idx_type,int>> &ret, vector<tuple<idx_type,idx_type,int>> &m1, vector<tuple<idx_type,idx_type,int>> &m2){
+    //suma de matrices en base a sus indices i y j
+    for(int i=0; i<m1.size(); i++){
+        for(int j=0; j<m2.size(); j++){
+            //cout << (get<0>(m1[i]) == get<0>(m2[j]) && get<1>(m1[i]) == get<1>(m2[j])) << endl;
+            if(get<0>(m1[i]) == get<0>(m2[j]) && get<1>(m1[i]) == get<1>(m2[j])){
+                ret.push_back(make_tuple(get<0>(m1[i]),get<1>(m1[i]),get<2>(m1[i])+get<2>(m2[j])));
+            }
+            else{
+                continue;
+            }
+        }
+    }
+    for(int i=0; i<m1.size(); i++){
+        for(auto v : ret){
+            if(get<0>(m1[i]) == get<0>(v) && get<1>(m1[i]) == get<1>(v)){
+                m1.erase(m1.begin()+i);
+            }
+            else{
+                continue;
+            }
+        }
+    }
+    for(int i=0; i<m2.size(); i++){
+        for(auto v : ret){
+            if(get<0>(m2[i]) == get<0>(v) && get<1>(m2[i]) == get<1>(v)){
+                m2.erase(m2.begin()+i);
+            }
+            else{
+                continue;
+            }
+        }
+    }
+    if(m1.size() > 0){
+        for(int i=0; i<m1.size(); i++){
+            ret.push_back(m1[i]);
+        }
+    }
+    if(m2.size() > 0){
+        for(int i=0; i<m2.size(); i++){
+            ret.push_back(m2[i]);
+        }
+    }
+}
+
 vector<vector<int>> addMatrices(const vector<vector<int>>& A, const vector<vector<int>>& B) {
     int n = A.size();
     vector<vector<int>> result(n, vector<int>(n, 0));

@@ -186,7 +186,6 @@ class k2_tree
 
         void build_from_edges(std::vector<std::tuple<idx_type, idx_type>>& edges, const size_type size) {
             typedef std::tuple<idx_type, idx_type, size_type, idx_type, idx_type> t_part_tuple;
-
             k_k = k;
             k_height = std::ceil(std::log(size) / std::log(k_k));
             k_height = k_height > 1 ? k_height : 1; // If size == 0
@@ -341,7 +340,7 @@ class k2_tree
          *              within 0 and size ([0, size[).
          */
         k2_tree(std::vector<std::tuple<idx_type, idx_type, int>>& array,
-                const int size)
+                size_type size=0)
         {
 
             //construir un vector de pares
@@ -353,6 +352,15 @@ class k2_tree
                 b = std::get<1>(array[i]);
                 std::tuple<idx_type, idx_type> t = std::make_tuple(a,b);
                 edges.push_back(t);
+            }
+
+            if(size==0){
+                size_type max = 0;
+                for(auto v : edges){
+                    max = std::max(static_cast<size_type>(std::get<0>(v)), max);
+                    max = std::max(static_cast<size_type>(std::get<1>(v)), max);
+                }
+                size = max + 1;
             }
 
             assert(size > 0);
@@ -604,40 +612,40 @@ class k2_tree
             return k_l_rank(i);
         }
 
-        idx_type get_child(idx_type a, idx_type i) {
-            // Comprobar que actual está dentro del rango de los bit vectors
+        int get_child(idx_type a, idx_type i) {
+            // Check that the current index is within the range of the bit vectors
             if (a < 0 || i < 0 || a >= k_t.size() + k_l.size()) {
-                std::cout << "Error: Índices fuera de rango" << std::endl;
-                return -1;  // Retornar -1 si hay un índice fuera de rango
+                //std::cout << "Error: Indices out of range" << std::endl;
+                return -1;  // Return std::nullopt if there is an out-of-range index
             }
-
+        
             // Si el índice está dentro del rango de `k_t`
             if (a < k_t.size()) {
-                if ((a + i) >= k_t.size()+k_l.size()) {
-                    std::cout << "Error: Índice k_t fuera de rango" << std::endl;
-                    return -1;
+                if ((a + i) >= k_t.size() + k_l.size()) {
+                    std::cout << "Error: k_t index out of range" << std::endl;
+                    return -1;  // Avoid accessing out of bounds
                 }
                 // Verificar si el bit actual es 1
                 if (k_t[a] == 1) {
                     // Calcular el hijo utilizando `rank`
-                    idx_type rank_val = k_t_rank(a+1);
+                    idx_type rank_val = k_t_rank(a + 1);
                     if (rank_val * k_k * k_k + i >= k_t.size() + k_l.size()) {
-                        std::cout << "Error: Rank calculado fuera de rango" << std::endl;
-                        return -1;  // Evitar acceder fuera de los límites
+                        std::cout << "Error: Calculated rank out of range" << std::endl;
+                        return -1;  // Avoid accessing out of bounds
                     }
                     return rank_val * k_k * k_k + i;  // Retornar el índice del hijo
                 } else {
-                    return -1;  // No hay hijo, retornar -1
+                    return -1;  // No hay hijo, retornar std::nullopt
                 }
             }
-
+        
             int leaf_index = a - k_t.size();
-            if (leaf_index < k_l.size() ) {
+            if (leaf_index < k_l.size() && leaf_index >= 0) {
                 // El valor en `k_l` es 1, retornar el índice `i`
                 return i;
             }
-
-            // Retornar -1 si no se cumple ninguna de las condiciones anteriores
+        
+            // Retornar std::nullopt si no se cumple ninguna de las condiciones anteriores
             return -1;
         }
 
