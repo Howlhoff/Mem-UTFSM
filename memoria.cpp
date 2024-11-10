@@ -859,7 +859,7 @@ void test_suma(string arch) {
         mat1 = reconstruct_matrix(m1);
         mat2 = reconstruct_matrix(m2);
         r2 = clock();
-        vector<vector<int>> res = addMatrices(mat1, mat2);
+        vector<vector<int>> res = sumaM(mat1, mat2);
         r3 = clock();
         double timeN = (double(r3 - r2) / CLOCKS_PER_SEC);
         out << v[0] << " " << v[1] << " " << timek2 << " " << timeN << endl;
