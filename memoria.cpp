@@ -763,7 +763,7 @@ void test_suma(string arch) {
         cerr << "Error opening output file: out.txt" << endl;
         return;
     }
-    out << "Matriz1 " << "Matriz2 " << "#_elem_MAT1 " << "#_elem_MAT2" << endl;
+    out << "Matriz1 " << "Matriz2 " << "K2_tree " << "Convencional" << endl;
     unsigned int r0, r1, r2, r3;
     string line;
     while (getline(file, line)) {
@@ -847,22 +847,22 @@ void test_suma(string arch) {
         file2.close();
         // Print vector tuple
         //print_vector_tuple(m2);
-        //k2_tree<2> arbol1(m1);
-        //k2_tree<2> arbol2(m2);
-        //vector<tuple<idx_type, idx_type, int>> ret;
-        //idx_type i = 0, j = 0;
-        //r0 = clock();
-        //suma(ret, arbol1, arbol2, -2, -2, false, false, i, j);
-        //r1 = clock();
-        //double timek2 = (double(r1 - r0) / CLOCKS_PER_SEC);
-        //vector<vector<int>> mat1, mat2;
-        //mat1 = reconstruct_matrix(m1);
-        //mat2 = reconstruct_matrix(m2);
-        //r2 = clock();
-        //vector<vector<int>> res = addMatrices(mat1, mat2);
-        //r3 = clock();
-        //double timeN = (double(r3 - r2) / CLOCKS_PER_SEC);
-        out << v[0] << " " << v[1] << " " << m1.size() << " " << m2.size() << endl;
+        k2_tree<2> arbol1(m1);
+        k2_tree<2> arbol2(m2);
+        vector<tuple<idx_type, idx_type, int>> ret;
+        idx_type i = 0, j = 0;
+        r0 = clock();
+        suma(ret, arbol1, arbol2, -2, -2, false, false, i, j);
+        r1 = clock();
+        double timek2 = (double(r1 - r0) / CLOCKS_PER_SEC);
+        vector<vector<int>> mat1, mat2;
+        mat1 = reconstruct_matrix(m1);
+        mat2 = reconstruct_matrix(m2);
+        r2 = clock();
+        vector<vector<int>> res = addMatrices(mat1, mat2);
+        r3 = clock();
+        double timeN = (double(r3 - r2) / CLOCKS_PER_SEC);
+        out << v[0] << " " << v[1] << " " << timek2 << " " << timeN << endl;
     }
     file.close();
     out.close();

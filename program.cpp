@@ -34,9 +34,7 @@ int cmd(){
     }
 }
 
-int main(){
-    //reads an archive and creates a k2 tree
-
+void program(){
     ifstream file1("matrix1.txt");
     vector<tuple<idx_type,idx_type,int>> values1;
     string line1;
@@ -115,12 +113,20 @@ int main(){
             cout << help() << endl;
         }
         else if(opt == 3){
+            cout << "Gracias por usar este programa!! Que tenga buen dia" << endl;
             break;
         }
         else{
             cout << "Opcion invalida, por favor ingrese una opcion valida" << endl;
         }
     }
+}
+
+int main(){
+    //reads an archive and creates a k2 tree
+
+    program();
+    
     return 0;
 
 }
