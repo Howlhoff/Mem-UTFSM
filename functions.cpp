@@ -86,18 +86,14 @@ void sumatest(vector<tuple<idx_type,idx_type,int>> &ret, vector<tuple<idx_type,i
     }
 }
 
-vector<vector<int>> sumaM(vector<vector<int>> m1, vector<vector<int>> m2){
-    //suma de matrices
-    vector<vector<int>> m3;
-    int n = m1.size();
-    for(int i=0; i<n; i++){
-        vector<int> fila;
-        for(int j=0; j<n; j++){
-            fila.push_back(m1[i][j]+m2[i][j]);
+vector<vector<int>> sumaM(vector<vector<int>> &A, vector<vector<int>> &B){
+    vector<vector<int>> C(2000,vector<int>(2000,0));
+    for(int i=0; i<2000; i++){
+        for(int j=0; j<2000; j++){
+            C[i][j] = A[i][j] + B[i][j];
         }
-        m3.push_back(fila);
     }
-    return m3;
+    return C;
 }
 
 vector<vector<int>> addMatrices(const vector<vector<int>>& A, const vector<vector<int>>& B) {

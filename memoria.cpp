@@ -5,6 +5,7 @@
 #include <tuple>
 #include <ctime>
 
+
 using namespace std;
 
 typedef uint64_t idx_type;
@@ -63,6 +64,96 @@ position shifting(idx_type i, idx_type j, int k){
 }
 
 // suma de k2 trees usando recursion
+
+void suma_test(vector<tuple<idx_type, idx_type, int>>& ret, k2_tree<2>& t1, k2_tree<2>& t2, idx_type pos1, idx_type pos2, bool flag1, bool flag2, idx_type i, idx_type j) {
+    // Caso base donde ambos nodos son hojas
+    if(pos1 == -2 && pos2 == -2){
+        idx_type i1 = (i << 1);
+        idx_type j1 = (j << 1);
+        suma_test(ret, t1, t2, 0, 0, flag1, flag2, i1 | 0ULL, j1 | 0ULL);
+        suma_test(ret, t1, t2, 1, 1, flag1, flag2, i1 | 0ULL, j1 | 1ULL);
+        suma_test(ret, t1, t2, 2, 2, flag1, flag2, i1 | 1ULL, j1 | 0ULL);
+        suma_test(ret, t1, t2, 3, 3, flag1, flag2, i1 | 1ULL, j1 | 1ULL);
+    }
+
+    flag1 = is_leaf(pos1, t1);
+    flag2 = is_leaf(pos2, t2);
+
+    if (flag1 && flag2) {
+        auto index1 = pos1 - t1.get_t().size();
+        auto index2 = pos2 - t2.get_t().size();
+
+        // Llamada optimizada a `get_l` y `get_k_l_rank` sólo una vez.
+        bool val1 = t1.get_l()[index1] == 1;
+        bool val2 = t2.get_l()[index2] == 1;
+
+        // Sumar sólo si ambos valores son relevantes
+        if (val1 && val2) {
+            auto add = t1.get_v(t1.get_k_l_rank(index1)) + t2.get_v(t2.get_k_l_rank(index2));
+            ret.emplace_back(i, j, add);
+        } else if (val1) {
+            auto add = t1.get_v(t1.get_k_l_rank(index1));
+            ret.emplace_back(i, j, add);
+        } else if (val2) {
+            auto add = t2.get_v(t2.get_k_l_rank(index2));
+            ret.emplace_back(i, j, add);
+        }
+        return;
+    }
+
+    // Cuando uno de los nodos es una hoja, procesa y evita recursión
+    if (flag1) {
+        if (t1.get_l()[pos1 - t1.get_t().size()] == 1) {
+            auto add = t1.get_v(t1.get_k_l_rank(pos1 - t1.get_t().size()));
+            ret.emplace_back(i, j, add);
+        }
+        return;
+    }
+
+    if (flag2) {
+        if (t2.get_l()[pos2 - t2.get_t().size()] == 1) {
+            auto add = t2.get_v(t2.get_k_l_rank(pos2 - t2.get_t().size()));
+            ret.emplace_back(i, j, add);
+        }
+        return;
+    }
+
+    // Asignación de hijos sólo si al menos uno de los nodos no es una hoja
+    int hijos1[4] = { -1, -1, -1, -1 };
+    int hijos2[4] = { -1, -1, -1, -1 };
+
+    if (pos1 != -1) {
+        hijos1[0] = t1.get_child(pos1, 0);  // A1
+        hijos1[1] = t1.get_child(pos1, 1);  // A2
+        hijos1[2] = t1.get_child(pos1, 2);  // A3
+        hijos1[3] = t1.get_child(pos1, 3);  // A4
+    }
+    
+    if (pos2 != -1) {
+        hijos2[0] = t2.get_child(pos2, 0);  // B1
+        hijos2[1] = t2.get_child(pos2, 1);  // B2
+        hijos2[2] = t2.get_child(pos2, 2);  // B3
+        hijos2[3] = t2.get_child(pos2, 3);  // B4
+    }
+
+    // Calcula los índices de la siguiente recursión sólo una vez
+    idx_type i1 = (i << 1);
+    idx_type j1 = (j << 1);
+
+    // Recursión en los cuadrantes sólo si al menos un hijo es válido
+    if (hijos1[0] != -1 || hijos2[0] != -1) {
+        suma_test(ret, t1, t2, hijos1[0], hijos2[0], flag1, flag2, i1 | 0ULL, j1 | 0ULL);
+    }
+    if (hijos1[1] != -1 || hijos2[1] != -1) {
+        suma_test(ret, t1, t2, hijos1[1], hijos2[1], flag1, flag2, i1 | 0ULL, j1 | 1ULL);
+    }
+    if (hijos1[2] != -1 || hijos2[2] != -1) {
+        suma_test(ret, t1, t2, hijos1[2], hijos2[2], flag1, flag2, i1 | 1ULL, j1 | 0ULL);
+    }
+    if (hijos1[3] != -1 || hijos2[3] != -1) {
+        suma_test(ret, t1, t2, hijos1[3], hijos2[3], flag1, flag2, i1 | 1ULL, j1 | 1ULL);
+    }
+}
 
 /**
  * Recursively sums the values of two k2_trees and stores the result in a vector of tuples.
@@ -738,13 +829,7 @@ void print_vector(vector<int> v){
 }
 
 vector<vector<int>> reconstruct_matrix(vector<tuple<idx_type,idx_type,int>> mat){
-    int n = 0;
-    for(int i=0; i<mat.size(); i++){
-        if(get<0>(mat[i]) > n){
-            n = get<0>(mat[i]);
-        }
-    }
-    n++;
+    int n = 2000;
     vector<vector<int>> matrix(n,vector<int>(n,0));
     for(int i=0; i<mat.size(); i++){
         matrix[get<0>(mat[i])][get<1>(mat[i])] = get<2>(mat[i]);
@@ -763,7 +848,7 @@ void test_suma(string arch) {
         cerr << "Error opening output file: out.txt" << endl;
         return;
     }
-    out << "Matriz1 " << "Matriz2 " << "K2_tree " << "Convencional" << endl;
+    out << "Matriz1 " << "Matriz2 " << "K2_tree " << "Convencional" << "#elem_m1" << "#elem_m2" <<endl;
     unsigned int r0, r1, r2, r3;
     string line;
     while (getline(file, line)) {
@@ -852,7 +937,7 @@ void test_suma(string arch) {
         vector<tuple<idx_type, idx_type, int>> ret;
         idx_type i = 0, j = 0;
         r0 = clock();
-        suma(ret, arbol1, arbol2, -2, -2, false, false, i, j);
+        suma_test(ret, arbol1, arbol2, -2, -2, false, false, i, j);
         r1 = clock();
         double timek2 = (double(r1 - r0) / CLOCKS_PER_SEC);
         vector<vector<int>> mat1, mat2;
@@ -862,7 +947,7 @@ void test_suma(string arch) {
         vector<vector<int>> res = sumaM(mat1, mat2);
         r3 = clock();
         double timeN = (double(r3 - r2) / CLOCKS_PER_SEC);
-        out << v[0] << " " << v[1] << " " << timek2 << " " << timeN << endl;
+        out << v[0] << " " << v[1] << " " << timek2 << " " << timeN << " " << m1.size() << " " << m2.size() << endl;
     }
     file.close();
     out.close();
@@ -872,8 +957,8 @@ void base_test(){
     vector<tuple<idx_type,idx_type,int>> m1 = {{0,0,1},{1,1,2},{0,3,3},{1,3,1},{2,1,8},{3,2,4}};
     vector<tuple<idx_type,idx_type,int>> m2 = {{0,2,2},{0,3,1},{1,3,1},{2,0,2},{3,3,1}}; 
     
-    //k2_tree<2> arbol1(m1);
-    //k2_tree<2> arbol2(m2);
+    k2_tree<2> arbol1(m1);
+    k2_tree<2> arbol2(m2);
     //print_vector(arbol1.get_l_values());
     //print_vector(arbol2.get_l_values());
     
@@ -890,22 +975,22 @@ void base_test(){
 
     //suma(ret,arbol1,arbol2,-2,-2,false,false,i,j);
     cout << "sumatest" << endl;
-    sumatest(ret,m1,m2);
+    suma_test(ret,arbol1,arbol2,-2,-2,false,false,i,j);
     //test_mult_test(ret,arbol1,arbol2,0,0,false,false,i,j);
-    //k2_tree<2> arbol3(ret);
+    k2_tree<2> arbol3(ret);
 
-    //print_bit_vector(arbol3.get_t());
-    //print_bit_vector(arbol3.get_l());
+    print_bit_vector(arbol3.get_t());
+    print_bit_vector(arbol3.get_l());
 
     //print ret
     //cout << "m1" << endl;
     //print_from_list_to_matrix(m1);
     //cout << "m2" << endl;
     //print_from_list_to_matrix(m2);
-    //cout << "ret" << endl;
+    cout << "ret" << endl;
     print_from_list_to_matrix(ret);
     cout << "ret values" << endl;
-    //print_vector(arbol3.get_l_values());
+    print_vector(arbol3.get_l_values());
 
     for(int i=0; i<ret.size(); i++){
         cout << get<0>(ret[i]) << " " << get<1>(ret[i]) << " " << get<2>(ret[i]) << endl;

@@ -126,7 +126,7 @@ int main(){
     //reads an archive and creates a k2 tree
 
     program();
-    
+
     return 0;
 
 }
