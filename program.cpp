@@ -125,7 +125,8 @@ void program(){
 int main(){
     //reads an archive and creates a k2 tree
 
-    program();
+    //program();
+    test_suma("input.txt");
 
     return 0;
 
