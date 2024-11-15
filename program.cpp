@@ -15,19 +15,16 @@ string help(){
 int cmd(){
     cout << "Ingrese una opcion (para ver los comandos ingrese opcion 2)" << endl;
     cout << "> ";
-    int v;
+    string v;
     cin >> v;
-    if(v == 1){
+    if(v == "sumar" || v == "sum"){
         return 1;
     }
-    if(v == 2){
+    if(v == "ayuda" || v == "help"){
         return 2;
     }
-    if(v == 3){
+    if(v == "salir" || v == "exit"){
         return 3;
-    }
-    if(v == 4){
-        return 4;
     }
     else{
         return 0;
