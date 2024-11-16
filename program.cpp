@@ -8,12 +8,12 @@ using namespace std;
 typedef uint64_t idx_type;
 
 string help(){
-    string v = "Para usar este programa tiene 3 opciones:\n\n1. Sumar 2 matrices\n2. Este mensaje\n3. Salir\n\nEste programa requiere que usted disponga de 2 archivos de texto llamados 'matrix1.txt' y 'matrix2.txt' con las matrices que desea operar en el siguiente formato.\n\nPor cada linea deben de haber 3 valores indicando la fila de la matriz, la columna y el valor de la matriz en esa posicion\n\nEjemplo:\n\n0 0 1\n0 1 2\n1 0 3\n1 1 4\n\nNota: Solo se deben de ingresar los valores no nulos de la matriz\n";
+    string v = "Para usar este programa tiene 3 opciones:\n\n1.'sumar' o 'sum': Sumar 2 matrices\n2.'ayuda' o 'help': Este mensaje\n3. 'salir' o 'exit': Salir de este programa\n\nEste programa requiere que usted disponga de 2 archivos de texto llamados 'matrix1.txt' y 'matrix2.txt' con las matrices que desea operar en el siguiente formato.\n\nPor cada linea deben de haber 3 valores indicando la fila de la matriz, la columna y el valor de la matriz en esa posicion\n\nEjemplo:\n\n0 0 1\n0 1 2\n1 0 3\n1 1 4\n\nNota: Solo se deben de ingresar los valores no nulos de la matriz\n";
     return v;
 }
 
 int cmd(){
-    cout << "Ingrese una opcion (para ver los comandos ingrese opcion 2)" << endl;
+    cout << "Ingrese una opcion (para ver los comandos escriba 'help' o 'ayuda')" << endl;
     cout << "> ";
     string v;
     cin >> v;
